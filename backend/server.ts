@@ -1,0 +1,60 @@
+import express from 'express';
+import cors from 'cors';
+import helmet from 'helmet';
+import dotenv from 'dotenv';
+import authRoutes from './src/routes/auth.js';
+import userRoutes from './src/routes/userRoutes.js';
+import categoryRoutes from './src/routes/categoryRoutes.js';
+import drugRoutes from './src/routes/drugRoutes.js';
+import inventoryRoutes from './src/routes/inventoryRoutes.js';
+import supplierRoutes from './src/routes/supplierRoutes.js';
+import purchaseOrderRoutes from './src/routes/purchaseOrderRoutes.js';
+import salesRoutes from './src/routes/salesRoutes.js';
+import orderRoutes from './src/routes/orderRoutes.js';
+import prescriptionRoutes from './src/routes/prescriptionRoutes.js';
+import promotionRoutes from './src/routes/promotionRoutes.js';
+import reportRoutes from './src/routes/reportRoutes.js';
+import auditRoutes from './src/routes/auditRoutes.js';
+import customerRoutes from './src/routes/customerRoutes.js';
+import settingsRoutes from './src/routes/settingsRoutes.js';
+import { rateLimit } from 'express-rate-limit';
+
+dotenv.config();
+
+const app = express();
+
+// Security middleware
+app.use(helmet());
+app.use(cors());
+app.use(express.json());
+
+// Rate limiting
+const limiter = rateLimit({
+	windowMs: 15 * 60 * 1000, // 15 minutes
+	max: 100, // Limit each IP to 100 requests per `window` (here, per 15 minutes)
+	standardHeaders: true,
+	legacyHeaders: false,
+});
+app.use(limiter);
+
+// Routes
+app.use('/auth', authRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/categories', categoryRoutes);
+app.use('/api/drugs', drugRoutes);
+app.use('/api/inventory', inventoryRoutes);
+app.use('/api/suppliers', supplierRoutes);
+app.use('/api/purchase-orders', purchaseOrderRoutes);
+app.use('/api/sales', salesRoutes);
+app.use('/api/orders', orderRoutes);
+app.use('/api/admin/prescriptions', prescriptionRoutes);
+app.use('/api/admin/promotions', promotionRoutes);
+app.use('/api/admin/reports', reportRoutes);
+app.use('/api/admin/audit-logs', auditRoutes);
+app.use('/api/customers', customerRoutes);
+app.use('/api/admin/settings', settingsRoutes);
+
+const PORT = process.env.PORT || 8000;
+app.listen(PORT, () => {
+	console.log(`Server running on port ${PORT}`);
+});

@@ -134,8 +134,8 @@ export default function CategoriesTab() {
     <div className="flex-1 p-10 overflow-y-auto">
       <div className="flex justify-between items-center mb-10">
         <div>
-          <h1 className="text-3xl font-bold text-white mb-2">Category Management</h1>
-          <p className="text-[#a09eb5]">Organize drugs into categories and manage their statuses.</p>
+          <h1 className="text-3xl font-bold text-main mb-2">Category Management</h1>
+          <p className="text-muted">Organize drugs into categories and manage their statuses.</p>
         </div>
         <button 
           onClick={handleOpenAddModal}
@@ -147,22 +147,22 @@ export default function CategoriesTab() {
       </div>
 
       {/* Filters and Search */}
-      <div className="bg-[#232136] p-4 rounded-2xl border border-white/5 mb-6 flex flex-col md:flex-row gap-4 justify-between items-center">
+      <div className="bg-surface p-4 rounded-2xl border border-subtle mb-6 flex flex-col md:flex-row gap-4 justify-between items-center">
         <div className="relative w-full md:w-96">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[#a09eb5]" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted" />
           <input 
             type="text" 
             placeholder="Search by category name..." 
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full bg-[#110f22] border border-white/5 text-white pl-10 pr-4 py-2 rounded-xl focus:outline-none focus:border-[#9b51e0] transition-colors"
+            className="w-full bg-base border border-subtle text-main pl-10 pr-4 py-2 rounded-xl focus:outline-none focus:border-[#9b51e0] transition-colors"
           />
         </div>
         <div className="flex gap-4 w-full md:w-auto">
           <select 
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="bg-[#110f22] border border-white/5 text-[#a09eb5] px-4 py-2 rounded-xl focus:outline-none focus:border-[#9b51e0] appearance-none"
+            className="bg-base border border-subtle text-muted px-4 py-2 rounded-xl focus:outline-none focus:border-[#9b51e0] appearance-none"
           >
             <option value="">All Statuses</option>
             <option value="active">Active</option>
@@ -172,32 +172,32 @@ export default function CategoriesTab() {
       </div>
 
       {/* Category Table */}
-      <div className="bg-[#232136] rounded-2xl border border-white/5 overflow-hidden">
+      <div className="bg-surface rounded-2xl border border-subtle overflow-hidden">
         {loading ? (
-          <div className="p-10 text-center text-[#a09eb5]">Loading categories...</div>
+          <div className="p-10 text-center text-muted">Loading categories...</div>
         ) : error ? (
           <div className="p-10 text-center text-red-400">{error}</div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="bg-white/5 border-b border-white/5">
-                  <th className="px-6 py-4 text-xs font-bold text-[#a09eb5] uppercase tracking-wider">Category</th>
-                  <th className="px-6 py-4 text-xs font-bold text-[#a09eb5] uppercase tracking-wider">Description</th>
-                  <th className="px-6 py-4 text-xs font-bold text-[#a09eb5] uppercase tracking-wider">Drugs</th>
-                  <th className="px-6 py-4 text-xs font-bold text-[#a09eb5] uppercase tracking-wider">Status</th>
-                  <th className="px-6 py-4 text-xs font-bold text-[#a09eb5] uppercase tracking-wider">Created Date</th>
-                  <th className="px-6 py-4 text-xs font-bold text-[#a09eb5] uppercase tracking-wider text-right">Actions</th>
+                <tr className="bg-hover border-b border-subtle">
+                  <th className="px-6 py-4 text-xs font-bold text-muted uppercase tracking-wider">Category</th>
+                  <th className="px-6 py-4 text-xs font-bold text-muted uppercase tracking-wider">Description</th>
+                  <th className="px-6 py-4 text-xs font-bold text-muted uppercase tracking-wider">Drugs</th>
+                  <th className="px-6 py-4 text-xs font-bold text-muted uppercase tracking-wider">Status</th>
+                  <th className="px-6 py-4 text-xs font-bold text-muted uppercase tracking-wider">Created Date</th>
+                  <th className="px-6 py-4 text-xs font-bold text-muted uppercase tracking-wider text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5">
                 {filteredCategories.length > 0 ? filteredCategories.map((cat) => (
                   <tr key={cat.id} className="hover:bg-white/[0.02] transition-colors">
                     <td className="px-6 py-4">
-                      <span className="text-white font-medium">{cat.name}</span>
+                      <span className="text-main font-medium">{cat.name}</span>
                     </td>
                     <td className="px-6 py-4">
-                      <div className="text-sm text-[#a09eb5] max-w-xs truncate" title={cat.description}>{cat.description || 'No description'}</div>
+                      <div className="text-sm text-muted max-w-xs truncate" title={cat.description}>{cat.description || 'No description'}</div>
                     </td>
                     <td className="px-6 py-4">
                       <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-[#9b51e0]/10 text-[#9b51e0]">
@@ -210,21 +210,21 @@ export default function CategoriesTab() {
                         {cat.status || 'Active'}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-sm text-[#a09eb5]">
+                    <td className="px-6 py-4 text-sm text-muted">
                       {new Date(cat.created_at).toLocaleDateString()}
                     </td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end space-x-2">
-                        <button onClick={() => handleOpenViewModal(cat)} className="p-2 text-[#a09eb5] hover:text-white hover:bg-white/10 rounded-lg transition-colors" title="View">
+                        <button onClick={() => handleOpenViewModal(cat)} className="p-2 text-muted hover:text-white hover:bg-white/10 rounded-lg transition-colors" title="View">
                           <Eye className="w-4 h-4" />
                         </button>
-                        <button onClick={() => handleOpenEditModal(cat)} className="p-2 text-[#a09eb5] hover:text-[#9b51e0] hover:bg-[#9b51e0]/10 rounded-lg transition-colors" title="Edit">
+                        <button onClick={() => handleOpenEditModal(cat)} className="p-2 text-muted hover:text-[#9b51e0] hover:bg-[#9b51e0]/10 rounded-lg transition-colors" title="Edit">
                           <Edit className="w-4 h-4" />
                         </button>
-                        <button onClick={() => handleToggleStatus(cat)} className={`p-2 rounded-lg transition-colors ${cat.status === 'active' ? 'text-[#a09eb5] hover:text-amber-400 hover:bg-amber-400/10' : 'text-[#a09eb5] hover:text-emerald-400 hover:bg-emerald-400/10'}`} title={cat.status === 'active' ? 'Deactivate' : 'Activate'}>
+                        <button onClick={() => handleToggleStatus(cat)} className={`p-2 rounded-lg transition-colors ${cat.status === 'active' ? 'text-muted hover:text-amber-400 hover:bg-amber-400/10' : 'text-muted hover:text-emerald-400 hover:bg-emerald-400/10'}`} title={cat.status === 'active' ? 'Deactivate' : 'Activate'}>
                           {cat.status === 'active' ? <XCircle className="w-4 h-4" /> : <CheckCircle className="w-4 h-4" />}
                         </button>
-                        <button onClick={() => handleDelete(cat)} className="p-2 text-[#a09eb5] hover:text-red-400 hover:bg-red-400/10 rounded-lg transition-colors" title="Delete">
+                        <button onClick={() => handleDelete(cat)} className="p-2 text-muted hover:text-red-400 hover:bg-red-400/10 rounded-lg transition-colors" title="Delete">
                           <Trash2 className="w-4 h-4" />
                         </button>
                       </div>
@@ -232,7 +232,7 @@ export default function CategoriesTab() {
                   </tr>
                 )) : (
                   <tr>
-                    <td colSpan={6} className="px-6 py-8 text-center text-[#a09eb5]">
+                    <td colSpan={6} className="px-6 py-8 text-center text-muted">
                       No categories found matching your criteria.
                     </td>
                   </tr>
@@ -246,35 +246,35 @@ export default function CategoriesTab() {
       {/* Add / Edit Modal */}
       {(isAddModalOpen || isEditModalOpen) && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-          <div className="bg-[#232136] rounded-2xl p-6 w-full max-w-md border border-white/10 shadow-2xl">
-            <h3 className="text-xl font-bold text-white mb-4">{isEditModalOpen ? 'Edit Category' : 'Add New Category'}</h3>
+          <div className="bg-surface rounded-2xl p-6 w-full max-w-md border border-subtle-hover shadow-2xl">
+            <h3 className="text-xl font-bold text-main mb-4">{isEditModalOpen ? 'Edit Category' : 'Add New Category'}</h3>
             <form onSubmit={handleSaveCategory} className="space-y-4">
               {isEditModalOpen && (
                 <div>
-                  <label className="block text-xs font-bold text-[#a09eb5] mb-1">Drug Count</label>
-                  <div className="w-full bg-[#110f22]/50 border border-white/5 rounded-xl px-4 py-2 text-[#a09eb5] cursor-not-allowed opacity-70">
+                  <label className="block text-xs font-bold text-muted mb-1">Drug Count</label>
+                  <div className="w-full bg-base/50 border border-subtle rounded-xl px-4 py-2 text-muted cursor-not-allowed opacity-70">
                     {selectedCategory ? selectedCategory.drugCount : 0} Drugs
                   </div>
-                  <p className="text-[10px] text-[#a09eb5] mt-1">Shows how many drugs belong to this category.</p>
+                  <p className="text-[10px] text-muted mt-1">Shows how many drugs belong to this category.</p>
                 </div>
               )}
               <div>
-                <label className="block text-xs font-bold text-[#a09eb5] mb-1">Category Name *</label>
-                <input required type="text" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="w-full bg-[#110f22] border border-white/5 rounded-xl px-4 py-2 text-white focus:outline-none focus:border-[#9b51e0]" />
+                <label className="block text-xs font-bold text-muted mb-1">Category Name *</label>
+                <input required type="text" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="w-full bg-base border border-subtle rounded-xl px-4 py-2 text-main focus:outline-none focus:border-[#9b51e0]" />
               </div>
               <div>
-                <label className="block text-xs font-bold text-[#a09eb5] mb-1">Description</label>
-                <textarea rows={3} value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} className="w-full bg-[#110f22] border border-white/5 rounded-xl px-4 py-2 text-white focus:outline-none focus:border-[#9b51e0] resize-none" />
+                <label className="block text-xs font-bold text-muted mb-1">Description</label>
+                <textarea rows={3} value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} className="w-full bg-base border border-subtle rounded-xl px-4 py-2 text-main focus:outline-none focus:border-[#9b51e0] resize-none" />
               </div>
               <div>
-                <label className="block text-xs font-bold text-[#a09eb5] mb-1">Status</label>
-                <select value={formData.status} onChange={e => setFormData({...formData, status: e.target.value})} className="w-full bg-[#110f22] border border-white/5 rounded-xl px-4 py-2 text-white focus:outline-none focus:border-[#9b51e0] appearance-none">
+                <label className="block text-xs font-bold text-muted mb-1">Status</label>
+                <select value={formData.status} onChange={e => setFormData({...formData, status: e.target.value})} className="w-full bg-base border border-subtle rounded-xl px-4 py-2 text-main focus:outline-none focus:border-[#9b51e0] appearance-none">
                   <option value="active">Active</option>
                   <option value="inactive">Inactive</option>
                 </select>
               </div>
               <div className="flex justify-end space-x-3 pt-4">
-                <button type="button" onClick={() => { setIsAddModalOpen(false); setIsEditModalOpen(false); }} className="px-4 py-2 text-[#a09eb5] hover:text-white transition-colors">Cancel</button>
+                <button type="button" onClick={() => { setIsAddModalOpen(false); setIsEditModalOpen(false); }} className="px-4 py-2 text-muted hover:text-main transition-colors">Cancel</button>
                 <button type="submit" className="px-4 py-2 bg-[#9b51e0] hover:bg-[#8b45cd] text-white rounded-xl font-bold transition-colors">Save Category</button>
               </div>
             </form>
@@ -285,55 +285,55 @@ export default function CategoriesTab() {
       {/* View Modal */}
       {isViewModalOpen && selectedCategory && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-          <div className="bg-[#232136] rounded-2xl p-6 w-full max-w-2xl border border-white/10 shadow-2xl flex flex-col max-h-[90vh]">
-            <h3 className="text-xl font-bold text-white mb-4">Category Details</h3>
+          <div className="bg-surface rounded-2xl p-6 w-full max-w-2xl border border-subtle-hover shadow-2xl flex flex-col max-h-[90vh]">
+            <h3 className="text-xl font-bold text-main mb-4">Category Details</h3>
             
             {viewLoading ? (
-              <div className="py-10 text-center text-[#a09eb5]">Loading details...</div>
+              <div className="py-10 text-center text-muted">Loading details...</div>
             ) : viewData ? (
               <div className="flex-1 overflow-y-auto custom-scrollbar pr-2 space-y-6">
                 {/* Details Section */}
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="bg-white/5 rounded-xl p-4 border border-white/5">
-                    <span className="block text-xs text-[#a09eb5] mb-1">Name</span>
-                    <span className="text-white font-medium text-lg">{viewData.name}</span>
+                  <div className="bg-hover rounded-xl p-4 border border-subtle">
+                    <span className="block text-xs text-muted mb-1">Name</span>
+                    <span className="text-main font-medium text-lg">{viewData.name}</span>
                   </div>
-                  <div className="bg-white/5 rounded-xl p-4 border border-white/5">
-                    <span className="block text-xs text-[#a09eb5] mb-1">Status</span>
+                  <div className="bg-hover rounded-xl p-4 border border-subtle">
+                    <span className="block text-xs text-muted mb-1">Status</span>
                     <span className={`font-medium capitalize ${viewData.status === 'active' ? 'text-emerald-400' : 'text-red-400'}`}>{viewData.status || 'Active'}</span>
                   </div>
-                  <div className="col-span-2 bg-white/5 rounded-xl p-4 border border-white/5">
-                    <span className="block text-xs text-[#a09eb5] mb-1">Description</span>
-                    <span className="text-white">{viewData.description || 'No description provided.'}</span>
+                  <div className="col-span-2 bg-hover rounded-xl p-4 border border-subtle">
+                    <span className="block text-xs text-muted mb-1">Description</span>
+                    <span className="text-main">{viewData.description || 'No description provided.'}</span>
                   </div>
                 </div>
 
                 {/* Assigned Drugs Section */}
                 <div>
-                  <h4 className="text-lg font-bold text-white mb-3">Assigned Drugs ({viewData.drugs?.length || 0})</h4>
+                  <h4 className="text-lg font-bold text-main mb-3">Assigned Drugs ({viewData.drugs?.length || 0})</h4>
                   {viewData.drugs && viewData.drugs.length > 0 ? (
-                    <div className="bg-[#110f22] rounded-xl border border-white/5 overflow-hidden">
+                    <div className="bg-base rounded-xl border border-subtle overflow-hidden">
                       <table className="w-full text-left text-sm">
-                        <thead className="bg-white/5">
+                        <thead className="bg-hover">
                           <tr>
-                            <th className="px-4 py-2 font-medium text-[#a09eb5]">Drug Name</th>
-                            <th className="px-4 py-2 font-medium text-[#a09eb5]">Stock</th>
-                            <th className="px-4 py-2 font-medium text-[#a09eb5]">Price</th>
+                            <th className="px-4 py-2 font-medium text-muted">Drug Name</th>
+                            <th className="px-4 py-2 font-medium text-muted">Stock</th>
+                            <th className="px-4 py-2 font-medium text-muted">Price</th>
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-white/5">
                           {viewData.drugs.map((drug: any) => (
                             <tr key={drug.id} className="hover:bg-white/[0.02]">
-                              <td className="px-4 py-3 text-white">{drug.name}</td>
-                              <td className="px-4 py-3 text-white">{drug.qty}</td>
-                              <td className="px-4 py-3 text-white">{formatCurrency(drug.price)}</td>
+                              <td className="px-4 py-3 text-main">{drug.name}</td>
+                              <td className="px-4 py-3 text-main">{drug.qty}</td>
+                              <td className="px-4 py-3 text-main">{formatCurrency(drug.price)}</td>
                             </tr>
                           ))}
                         </tbody>
                       </table>
                     </div>
                   ) : (
-                    <div className="bg-[#110f22] rounded-xl border border-white/5 p-6 text-center text-[#a09eb5] flex flex-col items-center">
+                    <div className="bg-base rounded-xl border border-subtle p-6 text-center text-muted flex flex-col items-center">
                       <AlertTriangle className="w-8 h-8 mb-2 text-amber-500/50" />
                       <p>No drugs are currently assigned to this category.</p>
                     </div>
@@ -344,7 +344,7 @@ export default function CategoriesTab() {
               <div className="py-10 text-center text-red-400">Failed to load details.</div>
             )}
 
-            <div className="flex justify-end pt-4 mt-4 border-t border-white/5">
+            <div className="flex justify-end pt-4 mt-4 border-t border-subtle">
               <button onClick={() => setIsViewModalOpen(false)} className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-xl font-bold transition-colors">Close</button>
             </div>
           </div>

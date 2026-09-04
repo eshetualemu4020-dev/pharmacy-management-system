@@ -11,10 +11,12 @@ import {
 const router = express.Router();
 
 router.use(requireAuth);
-router.use(requireRole(['admin']));
 
 router.get('/', getAllPromotions);
 router.get('/:id', getPromotionById);
+
+router.use(requireRole(['admin']));
+
 router.post('/', createPromotion);
 router.put('/:id', updatePromotion);
 router.put('/:id/status', updatePromotionStatus);

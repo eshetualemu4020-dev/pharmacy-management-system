@@ -47,25 +47,25 @@ export default function PromotionDetailsModal({ isOpen, onClose, promotionId, on
 
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center p-4 bg-black/60 backdrop-blur-sm overflow-y-auto">
-      <div className="bg-[#232136] rounded-2xl w-full max-w-2xl border border-white/10 shadow-2xl my-8">
-        <div className="flex items-center justify-between p-6 border-b border-white/5">
+      <div className="bg-surface rounded-2xl w-full max-w-2xl border border-subtle-hover shadow-2xl my-8">
+        <div className="flex items-center justify-between p-6 border-b border-subtle">
           <div className="flex items-center space-x-3">
             <div className="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-400">
               <Tag className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-xl font-bold text-white">Promotion Details</h2>
-              <p className="text-sm text-[#a09eb5]">ID: #{promotionId.toString().padStart(4, '0')}</p>
+              <h2 className="text-xl font-bold text-main">Promotion Details</h2>
+              <p className="text-sm text-muted">ID: #{promotionId.toString().padStart(4, '0')}</p>
             </div>
           </div>
-          <button onClick={onClose} className="p-2 text-[#a09eb5] hover:text-white transition-colors rounded-xl hover:bg-white/5">
+          <button onClick={onClose} className="p-2 text-muted hover:text-main transition-colors rounded-xl hover:bg-hover">
             <X className="w-5 h-5" />
           </button>
         </div>
 
         <div className="p-6">
           {loading ? (
-            <div className="text-center py-8 text-[#a09eb5]">Loading...</div>
+            <div className="text-center py-8 text-muted">Loading...</div>
           ) : error ? (
             <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-xl flex items-center space-x-3 text-red-400">
               <AlertCircle className="w-5 h-5 flex-shrink-0" />
@@ -75,18 +75,18 @@ export default function PromotionDetailsModal({ isOpen, onClose, promotionId, on
             <div className="space-y-6">
               
               <div className="grid grid-cols-2 gap-6">
-                <div className="bg-[#110f22] p-4 rounded-xl border border-white/5">
-                  <span className="block text-xs font-bold text-[#a09eb5] mb-1">Name</span>
-                  <p className="text-white font-medium">{promotion.name}</p>
+                <div className="bg-base p-4 rounded-xl border border-subtle">
+                  <span className="block text-xs font-bold text-muted mb-1">Name</span>
+                  <p className="text-main font-medium">{promotion.name}</p>
                 </div>
-                <div className="bg-[#110f22] p-4 rounded-xl border border-white/5">
-                  <span className="block text-xs font-bold text-[#a09eb5] mb-1">Status</span>
+                <div className="bg-base p-4 rounded-xl border border-subtle">
+                  <span className="block text-xs font-bold text-muted mb-1">Status</span>
                   <div className="flex items-center justify-between">
-                    <span className="text-white font-medium capitalize">{promotion.current_status}</span>
+                    <span className="text-main font-medium capitalize">{promotion.current_status}</span>
                     <select
                       value={promotion.status}
                       onChange={(e) => handleStatusToggle(e.target.value)}
-                      className="bg-[#232136] text-xs border border-white/10 rounded px-2 py-1 text-white focus:outline-none"
+                      className="bg-surface text-xs border border-subtle-hover rounded px-2 py-1 text-main focus:outline-none"
                     >
                       <option value="draft">Draft</option>
                       <option value="active">Active (Auto)</option>
@@ -95,18 +95,18 @@ export default function PromotionDetailsModal({ isOpen, onClose, promotionId, on
                   </div>
                 </div>
 
-                <div className="bg-[#110f22] p-4 rounded-xl border border-white/5">
-                  <span className="block text-xs font-bold text-[#a09eb5] mb-1">Discount</span>
+                <div className="bg-base p-4 rounded-xl border border-subtle">
+                  <span className="block text-xs font-bold text-muted mb-1">Discount</span>
                   <p className="text-2xl font-bold text-amber-400">
                     {promotion.discount_type === 'percentage' ? `${promotion.discount_value}%` : `${formatCurrency(promotion.discount_value)}`}
-                    <span className="text-sm font-medium text-[#a09eb5] ml-2 capitalize">OFF</span>
+                    <span className="text-sm font-medium text-muted ml-2 capitalize">OFF</span>
                   </p>
                 </div>
 
-                <div className="bg-[#110f22] p-4 rounded-xl border border-white/5">
-                  <span className="block text-xs font-bold text-[#a09eb5] mb-1">Validity Period</span>
-                  <div className="flex items-center space-x-2 text-white">
-                    <Calendar className="w-4 h-4 text-[#a09eb5]" />
+                <div className="bg-base p-4 rounded-xl border border-subtle">
+                  <span className="block text-xs font-bold text-muted mb-1">Validity Period</span>
+                  <div className="flex items-center space-x-2 text-main">
+                    <Calendar className="w-4 h-4 text-muted" />
                     <span>{new Date(promotion.start_date).toLocaleDateString()} to {new Date(promotion.end_date).toLocaleDateString()}</span>
                   </div>
                 </div>
@@ -114,31 +114,31 @@ export default function PromotionDetailsModal({ isOpen, onClose, promotionId, on
 
               {promotion.description && (
                 <div>
-                  <span className="block text-xs font-bold text-[#a09eb5] mb-2">Description</span>
-                  <p className="text-white text-sm bg-[#110f22] p-4 rounded-xl border border-white/5 whitespace-pre-wrap">
+                  <span className="block text-xs font-bold text-muted mb-2">Description</span>
+                  <p className="text-main text-sm bg-base p-4 rounded-xl border border-subtle whitespace-pre-wrap">
                     {promotion.description}
                   </p>
                 </div>
               )}
 
               <div>
-                <span className="block text-xs font-bold text-[#a09eb5] mb-2">Applicability</span>
-                <div className="bg-[#110f22] p-4 rounded-xl border border-white/5 max-h-48 overflow-y-auto">
+                <span className="block text-xs font-bold text-muted mb-2">Applicability</span>
+                <div className="bg-base p-4 rounded-xl border border-subtle max-h-48 overflow-y-auto">
                   {promotion.categories && promotion.categories.length > 0 ? (
                     <div>
-                      <p className="text-sm text-white font-bold mb-2">Selected Categories:</p>
+                      <p className="text-sm text-main font-bold mb-2">Selected Categories:</p>
                       <ul className="list-disc pl-5 space-y-1">
                         {promotion.categories.map((c: any) => (
-                          <li key={c.id} className="text-[#a09eb5] text-sm">{c.name}</li>
+                          <li key={c.id} className="text-muted text-sm">{c.name}</li>
                         ))}
                       </ul>
                     </div>
                   ) : promotion.drugs && promotion.drugs.length > 0 ? (
                     <div>
-                      <p className="text-sm text-white font-bold mb-2">Selected Drugs:</p>
+                      <p className="text-sm text-main font-bold mb-2">Selected Drugs:</p>
                       <ul className="list-disc pl-5 space-y-1">
                         {promotion.drugs.map((d: any) => (
-                          <li key={d.id} className="text-[#a09eb5] text-sm">{d.name} <span className="opacity-50">({d.generic_name})</span></li>
+                          <li key={d.id} className="text-muted text-sm">{d.name} <span className="opacity-50">({d.generic_name})</span></li>
                         ))}
                       </ul>
                     </div>

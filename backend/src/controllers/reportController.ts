@@ -41,14 +41,20 @@ export const getDashboardSummary = async (req: Request, res: Response) => {
        ordersDate.params
     );
 
+    const lowStockThresholdRows: any = await db.query(`SELECT setting_value FROM settings WHERE setting_key = 'low_stock_threshold'`);
+    const expiryDaysRows: any = await db.query(`SELECT setting_value FROM settings WHERE setting_key = 'expiry_warning_days'`);
+    
+    const lowStockThreshold = lowStockThresholdRows[0].length > 0 ? parseInt(lowStockThresholdRows[0][0].setting_value, 10) : 10;
+    const expiryDays = expiryDaysRows[0].length > 0 ? parseInt(expiryDaysRows[0][0].setting_value, 10) : 30;
+
     // 3. Products/Inventory
     const [inventoryStats]: any = await db.query(
       `SELECT 
         COUNT(*) as total_products,
-        COUNT(CASE WHEN qty > 0 AND qty < 20 THEN 1 END) as low_stock_products,
-        COUNT(CASE WHEN exp_date > CURDATE() AND exp_date < DATE_ADD(CURDATE(), INTERVAL 90 DAY) THEN 1 END) as expiring_soon,
-        COUNT(CASE WHEN exp_date < CURDATE() THEN 1 END) as expired_products
-       FROM drugs`
+        COUNT(CASE WHEN stock > 0 AND stock <= ? THEN 1 END) as low_stock_products,
+        (SELECT COUNT(DISTINCT drug_id) FROM batches WHERE exp_date > CURDATE() AND exp_date <= DATE_ADD(CURDATE(), INTERVAL ? DAY)) as expiring_soon,
+        (SELECT COUNT(DISTINCT drug_id) FROM batches WHERE exp_date < CURDATE()) as expired_products
+       FROM drugs`, [lowStockThreshold, expiryDays]
     );
 
     // 4. Prescriptions
@@ -138,27 +144,41 @@ export const getSalesReport = async (req: Request, res: Response) => {
 
 export const getInventoryReport = async (req: Request, res: Response) => {
   try {
+    const lowStockThresholdRows: any = await db.query(`SELECT setting_value FROM settings WHERE setting_key = 'low_stock_threshold'`);
+    const expiryDaysRows: any = await db.query(`SELECT setting_value FROM settings WHERE setting_key = 'expiry_warning_days'`);
+    
+    const lowStockThreshold = lowStockThresholdRows[0].length > 0 ? parseInt(lowStockThresholdRows[0][0].setting_value, 10) : 10;
+    const expiryDays = expiryDaysRows[0].length > 0 ? parseInt(expiryDaysRows[0][0].setting_value, 10) : 30;
+
     const [summary]: any = await db.query(`
       SELECT 
-        COALESCE(SUM(qty), 0) as total_stock_quantity,
-        COALESCE(SUM(qty * price), 0) as total_inventory_value,
-        COUNT(CASE WHEN qty > 0 THEN 1 END) as available_stock_products,
-        COUNT(CASE WHEN qty > 0 AND qty < 20 THEN 1 END) as low_stock_products,
-        COUNT(CASE WHEN qty = 0 THEN 1 END) as out_of_stock_products,
-        COUNT(CASE WHEN exp_date > CURDATE() AND exp_date < DATE_ADD(CURDATE(), INTERVAL 90 DAY) THEN 1 END) as expiring_products,
-        COUNT(CASE WHEN exp_date < CURDATE() THEN 1 END) as expired_products
+        COALESCE(SUM(stock), 0) as total_stock_quantity,
+        COALESCE(SUM(stock * price), 0) as total_inventory_value,
+        COUNT(CASE WHEN stock > 0 THEN 1 END) as available_stock_products,
+        COUNT(CASE WHEN stock > 0 AND stock <= ? THEN 1 END) as low_stock_products,
+        COUNT(CASE WHEN stock = 0 THEN 1 END) as out_of_stock_products,
+        (SELECT COUNT(DISTINCT drug_id) FROM batches WHERE exp_date > CURDATE() AND exp_date <= DATE_ADD(CURDATE(), INTERVAL ? DAY)) as expiring_products,
+        (SELECT COUNT(DISTINCT drug_id) FROM batches WHERE exp_date < CURDATE()) as expired_products
       FROM drugs
-    `);
+    `, [lowStockThreshold, expiryDays]);
 
     const [details]: any = await db.query(`
-      SELECT d.id, d.name, d.generic_name, d.batch_id, d.qty, d.price, d.exp_date, c.name as category_name
+      SELECT d.id, d.name, d.generic_name, 
+             (SELECT GROUP_CONCAT(batch_number SEPARATOR ', ') FROM batches WHERE drug_id = d.id AND quantity > 0) as batch_id,
+             d.stock as qty, d.price, 
+             (SELECT MIN(exp_date) FROM batches WHERE drug_id = d.id AND quantity > 0) as exp_date, 
+             c.name as category_name
       FROM drugs d
       LEFT JOIN categories c ON d.category_id = c.id
-      ORDER BY d.qty ASC
+      ORDER BY d.stock ASC
     `);
 
     res.json({
-      summary: summary[0],
+      summary: {
+        ...summary[0],
+        lowStockThreshold,
+        expiryDays
+      },
       details
     });
   } catch (err: any) {

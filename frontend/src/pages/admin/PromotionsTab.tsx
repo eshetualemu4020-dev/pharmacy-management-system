@@ -80,8 +80,8 @@ export default function PromotionsTab() {
     <div className="space-y-6">
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-white mb-2">Promotions & Offers</h1>
-          <p className="text-[#a09eb5]">Manage discounts, special offers, and pricing rules.</p>
+          <h1 className="text-3xl font-bold text-main mb-2">Promotions & Offers</h1>
+          <p className="text-muted">Manage discounts, special offers, and pricing rules.</p>
         </div>
         <button 
           onClick={handleOpenCreate}
@@ -92,25 +92,25 @@ export default function PromotionsTab() {
         </button>
       </div>
 
-      <div className="bg-[#232136] rounded-2xl border border-white/5 p-6 shadow-xl">
+      <div className="bg-surface rounded-2xl border border-subtle p-6 shadow-xl">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
           <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#a09eb5]" />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted" />
             <input 
               type="text" 
               placeholder="Search by promotion name or ID..." 
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full bg-[#110f22] border border-white/5 rounded-xl pl-12 pr-4 py-3 text-white focus:outline-none focus:border-[#9b51e0] transition-colors"
+              className="w-full bg-base border border-subtle rounded-xl pl-12 pr-4 py-3 text-main focus:outline-none focus:border-[#9b51e0] transition-colors"
             />
           </div>
           <div className="flex items-center space-x-4">
             <div className="relative">
-              <Filter className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#a09eb5]" />
+              <Filter className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted" />
               <select 
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="bg-[#110f22] border border-white/5 rounded-xl pl-12 pr-10 py-3 text-white focus:outline-none focus:border-[#9b51e0] appearance-none cursor-pointer transition-colors"
+                className="bg-base border border-subtle rounded-xl pl-12 pr-10 py-3 text-main focus:outline-none focus:border-[#9b51e0] appearance-none cursor-pointer transition-colors"
               >
                 <option value="">All Statuses</option>
                 <option value="draft">Draft</option>
@@ -133,22 +133,22 @@ export default function PromotionsTab() {
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="border-b border-white/5">
-                <th className="py-4 px-4 text-xs font-bold text-[#a09eb5] uppercase tracking-wider">Promotion</th>
-                <th className="py-4 px-4 text-xs font-bold text-[#a09eb5] uppercase tracking-wider">Discount</th>
-                <th className="py-4 px-4 text-xs font-bold text-[#a09eb5] uppercase tracking-wider">Period</th>
-                <th className="py-4 px-4 text-xs font-bold text-[#a09eb5] uppercase tracking-wider">Status</th>
-                <th className="py-4 px-4 text-xs font-bold text-[#a09eb5] uppercase tracking-wider text-right">Actions</th>
+              <tr className="border-b border-subtle">
+                <th className="py-4 px-4 text-xs font-bold text-muted uppercase tracking-wider">Promotion</th>
+                <th className="py-4 px-4 text-xs font-bold text-muted uppercase tracking-wider">Discount</th>
+                <th className="py-4 px-4 text-xs font-bold text-muted uppercase tracking-wider">Period</th>
+                <th className="py-4 px-4 text-xs font-bold text-muted uppercase tracking-wider">Status</th>
+                <th className="py-4 px-4 text-xs font-bold text-muted uppercase tracking-wider text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/5">
               {loading ? (
                 <tr>
-                  <td colSpan={5} className="py-12 text-center text-[#a09eb5]">Loading promotions...</td>
+                  <td colSpan={5} className="py-12 text-center text-muted">Loading promotions...</td>
                 </tr>
               ) : filteredPromotions.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="py-12 text-center text-[#a09eb5]">No promotions found.</td>
+                  <td colSpan={5} className="py-12 text-center text-muted">No promotions found.</td>
                 </tr>
               ) : (
                 filteredPromotions.map((promo) => (
@@ -159,19 +159,19 @@ export default function PromotionsTab() {
                           <Tag className="w-5 h-5" />
                         </div>
                         <div>
-                          <p className="font-bold text-white">{promo.name}</p>
-                          <p className="text-xs text-[#a09eb5]">ID: #{promo.id.toString().padStart(4, '0')}</p>
+                          <p className="font-bold text-main">{promo.name}</p>
+                          <p className="text-xs text-muted">ID: #{promo.id.toString().padStart(4, '0')}</p>
                         </div>
                       </div>
                     </td>
                     <td className="py-4 px-4">
-                      <p className="font-bold text-white">
+                      <p className="font-bold text-main">
                         {promo.discount_type === 'percentage' ? `${promo.discount_value}%` : `${formatCurrency(promo.discount_value)}`}
                       </p>
-                      <p className="text-xs text-[#a09eb5] capitalize">{promo.discount_type}</p>
+                      <p className="text-xs text-muted capitalize">{promo.discount_type}</p>
                     </td>
                     <td className="py-4 px-4">
-                      <div className="flex items-center space-x-2 text-sm text-[#a09eb5]">
+                      <div className="flex items-center space-x-2 text-sm text-muted">
                         <Calendar className="w-4 h-4 flex-shrink-0" />
                         <span>
                           {new Date(promo.start_date).toLocaleDateString()} - {new Date(promo.end_date).toLocaleDateString()}

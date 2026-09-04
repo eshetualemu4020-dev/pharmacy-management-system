@@ -42,8 +42,8 @@ export default function PharmacistExpiringSoonTab() {
     <div className="flex-1 p-10 overflow-y-auto">
       <div className="flex justify-between items-center mb-10">
         <div>
-          <h1 className="text-3xl font-bold text-white mb-2">Expiring Soon</h1>
-          <p className="text-[#a09eb5]">Monitor drug batches that have expired or will expire within 3 months.</p>
+          <h1 className="text-3xl font-bold text-main mb-2">Expiring Soon</h1>
+          <p className="text-muted">Monitor drug batches that have expired or will expire within 3 months.</p>
         </div>
       </div>
 
@@ -55,33 +55,33 @@ export default function PharmacistExpiringSoonTab() {
       )}
 
       {/* Filters */}
-      <div className="bg-[#232136] p-4 rounded-2xl border border-white/5 mb-6 flex flex-wrap gap-4">
+      <div className="bg-surface p-4 rounded-2xl border border-subtle mb-6 flex flex-wrap gap-4">
         <div className="flex-1 min-w-[300px] relative">
-          <Search className="w-5 h-5 text-[#a09eb5] absolute left-3 top-1/2 -translate-y-1/2" />
+          <Search className="w-5 h-5 text-muted absolute left-3 top-1/2 -translate-y-1/2" />
           <input 
             type="text" 
             placeholder="Search by drug name or batch number..." 
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full bg-[#110f22] border border-white/10 text-white rounded-xl pl-10 pr-4 py-2 focus:outline-none focus:border-[#10b981] transition-colors"
+            className="w-full bg-base border border-subtle-hover text-main rounded-xl pl-10 pr-4 py-2 focus:outline-none focus:border-[#10b981] transition-colors"
           />
         </div>
       </div>
 
       {/* Batches Table */}
-      <div className="bg-[#232136] rounded-2xl border border-white/5 overflow-hidden">
+      <div className="bg-surface rounded-2xl border border-subtle overflow-hidden">
         {loading ? (
-          <div className="p-10 text-center text-[#a09eb5]">Loading expiring batches...</div>
+          <div className="p-10 text-center text-muted">Loading expiring batches...</div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="bg-[#110f22]/50 border-b border-white/5">
-                  <th className="p-4 text-[#a09eb5] font-semibold text-sm">Batch Number</th>
-                  <th className="p-4 text-[#a09eb5] font-semibold text-sm">Drug Name</th>
-                  <th className="p-4 text-[#a09eb5] font-semibold text-sm">Quantity</th>
-                  <th className="p-4 text-[#a09eb5] font-semibold text-sm">Expiry Date</th>
-                  <th className="p-4 text-[#a09eb5] font-semibold text-sm text-right">Status</th>
+                <tr className="bg-base/50 border-b border-subtle">
+                  <th className="p-4 text-muted font-semibold text-sm">Batch Number</th>
+                  <th className="p-4 text-muted font-semibold text-sm">Drug Name</th>
+                  <th className="p-4 text-muted font-semibold text-sm">Quantity</th>
+                  <th className="p-4 text-muted font-semibold text-sm">Expiry Date</th>
+                  <th className="p-4 text-muted font-semibold text-sm text-right">Status</th>
                 </tr>
               </thead>
               <tbody>
@@ -91,16 +91,16 @@ export default function PharmacistExpiringSoonTab() {
                   const isExpired = expDate < today;
                   
                   return (
-                    <tr key={batch.id} className="border-b border-white/5 hover:bg-white/5 transition-colors">
+                    <tr key={batch.id} className="border-b border-subtle hover:bg-hover transition-colors">
                       <td className="p-4">
                         <div className="flex items-center space-x-2">
                           <Layers className="w-4 h-4 text-[#3b82f6]" />
-                          <span className="font-medium text-white">{batch.batch_number}</span>
+                          <span className="font-medium text-main">{batch.batch_number}</span>
                         </div>
                       </td>
-                      <td className="p-4 text-white">{batch.drug_name}</td>
+                      <td className="p-4 text-main">{batch.drug_name}</td>
                       <td className="p-4">
-                        <span className="font-medium text-white">{batch.quantity}</span>
+                        <span className="font-medium text-main">{batch.quantity}</span>
                       </td>
                       <td className="p-4">
                         <span className={`font-bold ${isExpired ? 'text-red-400' : 'text-orange-400'}`}>

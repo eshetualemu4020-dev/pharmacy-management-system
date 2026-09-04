@@ -23,14 +23,14 @@ const AuditLogDetailsModal: React.FC<AuditLogDetailsModalProps> = ({ log, onClos
 
     // Formatter for JSON viewing
     const JsonViewer = ({ data }: { data: any }) => {
-        if (!data) return <span className="text-[#a09eb5] italic">None</span>;
+        if (!data) return <span className="text-muted italic">None</span>;
         
         if (typeof data !== 'object') {
-            return <span className="text-white">{String(data)}</span>;
+            return <span className="text-main">{String(data)}</span>;
         }
 
         return (
-            <pre className="bg-[#110f22] p-4 rounded-xl text-sm text-[#a09eb5] overflow-x-auto whitespace-pre-wrap font-mono border border-white/5">
+            <pre className="bg-base p-4 rounded-xl text-sm text-muted overflow-x-auto whitespace-pre-wrap font-mono border border-subtle">
                 {JSON.stringify(data, null, 2)}
             </pre>
         );
@@ -38,10 +38,10 @@ const AuditLogDetailsModal: React.FC<AuditLogDetailsModalProps> = ({ log, onClos
 
     return (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <div className="bg-[#232136] rounded-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col shadow-2xl border border-white/10">
+            <div className="bg-surface rounded-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col shadow-2xl border border-subtle-hover">
                 {/* Header */}
-                <div className="px-6 py-5 border-b border-white/10 flex justify-between items-center bg-white/[0.02]">
-                    <h2 className="text-xl font-bold text-white flex items-center gap-3">
+                <div className="px-6 py-5 border-b border-subtle-hover flex justify-between items-center bg-white/[0.02]">
+                    <h2 className="text-xl font-bold text-main flex items-center gap-3">
                         <div className="w-10 h-10 rounded-xl bg-[#9b51e0]/10 flex items-center justify-center text-[#9b51e0]">
                             <Activity size={20} />
                         </div>
@@ -49,7 +49,7 @@ const AuditLogDetailsModal: React.FC<AuditLogDetailsModalProps> = ({ log, onClos
                     </h2>
                     <button
                         onClick={onClose}
-                        className="p-2 text-[#a09eb5] hover:text-white hover:bg-white/10 rounded-xl transition-colors"
+                        className="p-2 text-muted hover:text-white hover:bg-white/10 rounded-xl transition-colors"
                     >
                         <X size={20} />
                     </button>
@@ -60,43 +60,43 @@ const AuditLogDetailsModal: React.FC<AuditLogDetailsModalProps> = ({ log, onClos
                     
                     {/* Basic Info */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="bg-[#110f22] p-4 rounded-xl border border-white/5">
-                            <div className="flex items-center gap-2 text-sm text-[#a09eb5] mb-2 font-medium">
+                        <div className="bg-base p-4 rounded-xl border border-subtle">
+                            <div className="flex items-center gap-2 text-sm text-muted mb-2 font-medium">
                                 <Clock size={16} /> Date & Time
                             </div>
-                            <div className="text-white">
+                            <div className="text-main">
                                 {new Date(log.created_at).toLocaleString()}
                             </div>
                         </div>
 
-                        <div className="bg-[#110f22] p-4 rounded-xl border border-white/5">
-                            <div className="flex items-center gap-2 text-sm text-[#a09eb5] mb-2 font-medium">
+                        <div className="bg-base p-4 rounded-xl border border-subtle">
+                            <div className="flex items-center gap-2 text-sm text-muted mb-2 font-medium">
                                 <User size={16} /> User
                             </div>
-                            <div className="text-white">
-                                {log.username || 'System'} <span className="text-[#a09eb5] font-normal capitalize">({(log.role || 'N/A').replace('_', ' ')})</span>
+                            <div className="text-main">
+                                {log.username || 'System'} <span className="text-muted font-normal capitalize">({(log.role || 'N/A').replace('_', ' ')})</span>
                             </div>
                         </div>
 
-                        <div className="bg-[#110f22] p-4 rounded-xl border border-white/5">
-                            <div className="flex items-center gap-2 text-sm text-[#a09eb5] mb-2 font-medium">
+                        <div className="bg-base p-4 rounded-xl border border-subtle">
+                            <div className="flex items-center gap-2 text-sm text-muted mb-2 font-medium">
                                 <Box size={16} /> Module / Target
                             </div>
-                            <div className="text-white">
+                            <div className="text-main">
                                 {log.module || 'System'}
                                 {log.target_table && (
-                                    <span className="text-[#a09eb5] font-normal block mt-1">
-                                        Target: {log.target_table} {log.target_id ? <span className="font-mono text-white/80">#{log.target_id}</span> : ''}
+                                    <span className="text-muted font-normal block mt-1">
+                                        Target: {log.target_table} {log.target_id ? <span className="font-mono text-main/80">#{log.target_id}</span> : ''}
                                     </span>
                                 )}
                             </div>
                         </div>
 
-                        <div className="bg-[#110f22] p-4 rounded-xl border border-white/5">
-                            <div className="flex items-center gap-2 text-sm text-[#a09eb5] mb-2 font-medium">
+                        <div className="bg-base p-4 rounded-xl border border-subtle">
+                            <div className="flex items-center gap-2 text-sm text-muted mb-2 font-medium">
                                 <Activity size={16} /> Action
                             </div>
-                            <div className="text-white font-medium">
+                            <div className="text-main font-medium">
                                 {log.action}
                             </div>
                         </div>
@@ -107,13 +107,13 @@ const AuditLogDetailsModal: React.FC<AuditLogDetailsModalProps> = ({ log, onClos
                         <div className="flex items-center gap-2 text-[#9b51e0] font-bold mb-2">
                             <FileText size={18} /> Description
                         </div>
-                        <div className="text-white">
-                            {log.description || <span className="text-[#a09eb5] italic">No description provided</span>}
+                        <div className="text-main">
+                            {log.description || <span className="text-muted italic">No description provided</span>}
                         </div>
                         {/* Fallback for old logs that used details column instead of description */}
                         {log.details && (
-                            <div className="mt-3 pt-3 border-t border-[#9b51e0]/20 text-sm text-[#a09eb5]">
-                                <span className="font-medium text-white/70">Raw Details:</span> {log.details}
+                            <div className="mt-3 pt-3 border-t border-[#9b51e0]/20 text-sm text-muted">
+                                <span className="font-medium text-main/70">Raw Details:</span> {log.details}
                             </div>
                         )}
                     </div>
@@ -121,7 +121,7 @@ const AuditLogDetailsModal: React.FC<AuditLogDetailsModalProps> = ({ log, onClos
                     {/* State Changes */}
                     {(oldValue || newValue) && (
                         <div className="space-y-4">
-                            <h3 className="text-lg font-bold text-white border-b border-white/10 pb-3 flex items-center gap-2">
+                            <h3 className="text-lg font-bold text-main border-b border-subtle-hover pb-3 flex items-center gap-2">
                                 State Changes
                             </h3>
                             
@@ -147,10 +147,10 @@ const AuditLogDetailsModal: React.FC<AuditLogDetailsModalProps> = ({ log, onClos
                 </div>
 
                 {/* Footer */}
-                <div className="px-6 py-5 border-t border-white/10 bg-white/[0.02] flex justify-end">
+                <div className="px-6 py-5 border-t border-subtle-hover bg-white/[0.02] flex justify-end">
                     <button
                         onClick={onClose}
-                        className="px-6 py-2.5 bg-[#110f22] text-white border border-white/10 font-bold rounded-xl hover:bg-white/10 transition-colors"
+                        className="px-6 py-2.5 bg-base text-white border border-subtle-hover font-bold rounded-xl hover:bg-white/10 transition-colors"
                     >
                         Close Details
                     </button>

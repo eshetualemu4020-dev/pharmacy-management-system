@@ -73,8 +73,8 @@ export const createPurchaseOrder = async (req: Request, res: Response): Promise<
 
         for (const item of items) {
             await connection.query(
-                `INSERT INTO purchase_order_items (purchase_order_id, drug_name, quantity_ordered, unit_cost) VALUES (?, ?, ?, ?)`,
-                [poId, item.drug_name, item.quantity, item.unit_cost]
+                `INSERT INTO purchase_order_items (purchase_order_id, drug_id, drug_name, quantity_ordered, unit_cost) VALUES (?, ?, ?, ?, ?)`,
+                [poId, item.drug_id || null, item.drug_name, item.quantity, item.unit_cost]
             );
         }
 
@@ -125,7 +125,7 @@ export const updatePurchaseOrderStatus = async (req: Request, res: Response): Pr
 };
 
 export const receivePurchaseOrder = async (req: Request, res: Response): Promise<any> => {
-    const { items } = req.body; // Array of { id: item_id, quantity_received, batch_id, mfg_date, exp_date, retail_price, category_id }
+    const { items } = req.body; // Array of { id: po_item_id, quantity_received, batch_number, mfg_date, exp_date, drug_id, category_id, retail_price }
     
     const connection = await pool.getConnection();
     try {
@@ -133,6 +133,8 @@ export const receivePurchaseOrder = async (req: Request, res: Response): Promise
 
         let allReceived = true;
         let anyReceived = false;
+
+        const purchaseOrderId = req.params.id;
 
         for (const item of items) {
             if (item.quantity_received > 0) {
@@ -144,52 +146,76 @@ export const receivePurchaseOrder = async (req: Request, res: Response): Promise
                     [item.quantity_received, item.id]
                 );
 
-                // 2. Check if batch already exists in drugs
-                const [existingBatch] = await connection.query<RowDataPacket[]>(
-                    `SELECT id, qty FROM drugs WHERE batch_id = ?`,
-                    [item.batch_id]
+                // Get drug details from PO item
+                const [poItemRows] = await connection.query<RowDataPacket[]>(
+                    `SELECT drug_name, drug_id FROM purchase_order_items WHERE id = ?`,
+                    [item.id]
                 );
+                
+                let actualDrugId = item.drug_id || poItemRows[0].drug_id;
 
-                if (existingBatch.length > 0) {
-                    // Update qty
-                    await connection.query(
-                        `UPDATE drugs SET qty = qty + ? WHERE id = ?`,
-                        [item.quantity_received, existingBatch[0].id]
-                    );
-                    
-                    // Link drug to PO item
-                    await connection.query(
-                        `UPDATE purchase_order_items SET drug_id = ? WHERE id = ?`,
-                        [existingBatch[0].id, item.id]
-                    );
-                } else {
-                    // Create new drug/batch record
-                    // First get the item details to know the name
-                    const [poItemRows] = await connection.query<RowDataPacket[]>(
-                        `SELECT drug_name FROM purchase_order_items WHERE id = ?`,
-                        [item.id]
-                    );
-                    const drugName = poItemRows[0].drug_name;
-
+                if (!actualDrugId) {
+                    // Create drug if it doesn't exist
                     const [insertResult] = await connection.query<ResultSetHeader>(
-                        `INSERT INTO drugs (name, batch_id, category_id, qty, price, mfg_date, exp_date) VALUES (?, ?, ?, ?, ?, ?, ?)`,
-                        [drugName, item.batch_id, item.category_id || null, item.quantity_received, item.retail_price, item.mfg_date, item.exp_date]
+                        `INSERT INTO drugs (name, category_id, stock, price) VALUES (?, ?, 0, ?)`,
+                        [poItemRows[0].drug_name, item.category_id || null, item.retail_price || 0]
                     );
+                    actualDrugId = insertResult.insertId;
 
-                    // Link drug to PO item
+                    // Update PO item with new drug_id
                     await connection.query(
                         `UPDATE purchase_order_items SET drug_id = ? WHERE id = ?`,
-                        [insertResult.insertId, item.id]
+                        [actualDrugId, item.id]
                     );
                 }
+
+                // 2. Check if batch already exists for this drug
+                const [existingBatch] = await connection.query<RowDataPacket[]>(
+                    `SELECT id, quantity FROM batches WHERE drug_id = ? AND batch_number = ?`,
+                    [actualDrugId, item.batch_number]
+                );
+
+                let batchId;
+                if (existingBatch.length > 0) {
+                    batchId = existingBatch[0].id;
+                    await connection.query(
+                        `UPDATE batches SET quantity = quantity + ? WHERE id = ?`,
+                        [item.quantity_received, batchId]
+                    );
+                } else {
+                    // Get supplier_id from purchase order
+                    const [poRows] = await connection.query<RowDataPacket[]>(
+                        `SELECT supplier_id FROM purchase_orders WHERE id = ?`,
+                        [purchaseOrderId]
+                    );
+                    const supplierId = poRows[0].supplier_id;
+
+                    const [batchResult] = await connection.query<ResultSetHeader>(
+                        `INSERT INTO batches (drug_id, batch_number, quantity, mfg_date, exp_date, supplier_id, purchase_order_id, received_date) VALUES (?, ?, ?, ?, ?, ?, ?, CURDATE())`,
+                        [actualDrugId, item.batch_number, item.quantity_received, item.mfg_date, item.exp_date, supplierId, purchaseOrderId]
+                    );
+                    batchId = batchResult.insertId;
+                }
+
+                // 3. Update overall drug stock
+                await connection.query(
+                    `UPDATE drugs SET stock = stock + ? WHERE id = ?`,
+                    [item.quantity_received, actualDrugId]
+                );
+
+                // 4. Record Inventory Transaction
+                await connection.query(
+                    `INSERT INTO inventory_transactions (drug_id, batch_id, transaction_type, quantity, remarks) VALUES (?, ?, 'ADD', ?, ?)`,
+                    [actualDrugId, batchId, item.quantity_received, `Received from PO #${purchaseOrderId}`]
+                );
             } else {
-                allReceived = false; // if an item didn't receive anything
+                allReceived = false;
             }
         }
 
         // Update PO status
         const status = allReceived ? 'received' : (anyReceived ? 'partially_received' : 'ordered');
-        await connection.query(`UPDATE purchase_orders SET status = ? WHERE id = ?`, [status, req.params.id]);
+        await connection.query(`UPDATE purchase_orders SET status = ? WHERE id = ?`, [status, purchaseOrderId]);
 
         await connection.commit();
         res.json({ message: 'Items received successfully' });
@@ -200,14 +226,14 @@ export const receivePurchaseOrder = async (req: Request, res: Response): Promise
                 action: 'PURCHASE_ORDER_STATUS_CHANGE',
                 module: 'Purchase Orders',
                 entityType: 'purchase_orders',
-                entityId: parseInt(req.params.id),
-                description: `Purchase order #${req.params.id} received items`,
-                newValue: { status: 'received' }
+                entityId: parseInt(purchaseOrderId),
+                description: `Purchase order #${purchaseOrderId} received items`,
+                newValue: { status }
             });
         }
     } catch (error) {
         await connection.rollback();
-        console.error(error);
+        console.error('Error receiving PO:', error);
         res.status(500).json({ error: 'Server error receiving purchase order' });
     } finally {
         connection.release();

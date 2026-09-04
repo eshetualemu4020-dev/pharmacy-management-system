@@ -1,8 +1,39 @@
 @import "tailwindcss";
 
+@theme {
+  --color-base: var(--bg-base);
+  --color-surface: var(--bg-surface);
+  --color-surface-alt: var(--bg-surface-alt);
+  --color-main: var(--text-main);
+  --color-muted: var(--text-muted);
+  --color-subtle: var(--border-subtle);
+  --color-subtle-hover: var(--border-subtle-hover);
+  --color-hover: var(--bg-hover);
+}
+
 @layer base {
+  :root {
+    --bg-base: #f3f4f6;       /* Gray-100 */
+    --bg-surface: #ffffff;    /* White */
+    --bg-surface-alt: #f9fafb;/* Gray-50 */
+    --text-main: #111827;     /* Gray-900 */
+    --text-muted: #6b7280;    /* Gray-500 */
+    --border-subtle: #e5e7eb; /* Gray-200 */
+    --border-subtle-hover: #d1d5db; /* Gray-300 */
+    --bg-hover: #f3f4f6;
+  }
+  .dark {
+    --bg-base: #110f22;
+    --bg-surface: #232136;
+    --bg-surface-alt: #24223d;
+    --text-main: #ffffff;
+    --text-muted: #a09eb5;
+    --border-subtle: rgba(255, 255, 255, 0.05);
+    --border-subtle-hover: rgba(255, 255, 255, 0.1);
+    --bg-hover: rgba(255, 255, 255, 0.05);
+  }
   body {
-    @apply bg-[#110f22] text-white font-sans overflow-y-scroll;
+    @apply bg-base text-main font-sans overflow-y-scroll transition-colors duration-200;
   }
 }
 @layer utilities {

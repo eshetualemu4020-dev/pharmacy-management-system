@@ -3,7 +3,7 @@ import { Search, Eye, Filter, CheckCircle, XCircle, Clock, Play, FileText, Alert
 import { orderApi } from '../../services/api';
 import { formatCurrency } from '../../utils/currency';
 
-export default function PharmacistOrdersTab() {
+export default function PharmacistOrdersTab({ navigationContext }: { navigationContext?: any }) {
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -46,6 +46,15 @@ export default function PharmacistOrdersTab() {
   useEffect(() => {
     fetchOrders();
   }, [page, statusFilter, dateFilter]);
+
+  useEffect(() => {
+    if (navigationContext?.contextId) {
+      openOrderDetails(navigationContext.contextId);
+      if (navigationContext.search) {
+        setSearchTerm(navigationContext.search);
+      }
+    }
+  }, [navigationContext]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -112,28 +121,28 @@ export default function PharmacistOrdersTab() {
     <div className="flex-1 p-10 overflow-y-auto">
       <div className="flex justify-between items-center mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-white mb-2">Orders Management</h1>
-          <p className="text-[#a09eb5]">Process online orders, verify stock, and manage fulfillment.</p>
+          <h1 className="text-3xl font-bold text-main mb-2">Orders Management</h1>
+          <p className="text-muted">Process online orders, verify stock, and manage fulfillment.</p>
         </div>
       </div>
 
-      <div className="bg-[#232136] rounded-2xl border border-white/5 p-6 mb-8">
+      <div className="bg-surface rounded-2xl border border-subtle p-6 mb-8">
         <form onSubmit={handleSearch} className="flex flex-col md:flex-row gap-4">
           <div className="flex-1 relative">
-            <Search className="w-5 h-5 text-[#a09eb5] absolute left-4 top-1/2 transform -translate-y-1/2" />
+            <Search className="w-5 h-5 text-muted absolute left-4 top-1/2 transform -translate-y-1/2" />
             <input 
               type="text" 
               placeholder="Search by Order #, Customer Name, Phone..." 
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full bg-[#1a1825] border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white focus:outline-none focus:border-[#10b981] transition-colors"
+              className="w-full bg-base border border-subtle-hover rounded-xl py-3 pl-12 pr-4 text-main focus:outline-none focus:border-[#10b981] transition-colors"
             />
           </div>
           
           <select 
             value={statusFilter}
             onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
-            className="bg-[#1a1825] border border-white/10 rounded-xl py-3 px-4 text-white focus:outline-none focus:border-[#10b981] transition-colors"
+            className="bg-base border border-subtle-hover rounded-xl py-3 px-4 text-main focus:outline-none focus:border-[#10b981] transition-colors"
           >
             <option value="">All Statuses</option>
             <option value="pending">Pending</option>
@@ -148,7 +157,7 @@ export default function PharmacistOrdersTab() {
           <select 
             value={dateFilter}
             onChange={(e) => { setDateFilter(e.target.value); setPage(1); }}
-            className="bg-[#1a1825] border border-white/10 rounded-xl py-3 px-4 text-white focus:outline-none focus:border-[#10b981] transition-colors"
+            className="bg-base border border-subtle-hover rounded-xl py-3 px-4 text-main focus:outline-none focus:border-[#10b981] transition-colors"
           >
             <option value="">Any Time</option>
             <option value="today">Today</option>
@@ -156,50 +165,50 @@ export default function PharmacistOrdersTab() {
             <option value="month">This Month</option>
           </select>
 
-          <button type="submit" className="bg-[#10b981] hover:bg-[#059669] text-white px-6 py-3 rounded-xl font-medium transition-colors">
+          <button type="submit" className="bg-[#10b981] hover:bg-[#059669] text-main px-6 py-3 rounded-xl font-medium transition-colors">
             Search
           </button>
         </form>
       </div>
 
-      <div className="bg-[#232136] rounded-2xl border border-white/5 overflow-hidden">
-        {loading && <div className="p-8 text-center text-[#a09eb5]">Loading orders...</div>}
+      <div className="bg-surface rounded-2xl border border-subtle overflow-hidden">
+        {loading && <div className="p-8 text-center text-muted">Loading orders...</div>}
         {error && <div className="p-8 text-center text-red-400">{error}</div>}
         
         {!loading && !error && (
           <table className="w-full">
             <thead>
-              <tr className="border-b border-white/5">
-                <th className="text-left py-4 px-6 text-[#a09eb5] font-medium text-sm">Order #</th>
-                <th className="text-left py-4 px-6 text-[#a09eb5] font-medium text-sm">Customer</th>
-                <th className="text-left py-4 px-6 text-[#a09eb5] font-medium text-sm">Items</th>
-                <th className="text-left py-4 px-6 text-[#a09eb5] font-medium text-sm">Total</th>
-                <th className="text-left py-4 px-6 text-[#a09eb5] font-medium text-sm">Date</th>
-                <th className="text-left py-4 px-6 text-[#a09eb5] font-medium text-sm">Status</th>
-                <th className="text-right py-4 px-6 text-[#a09eb5] font-medium text-sm">Action</th>
+              <tr className="border-b border-subtle">
+                <th className="text-left py-4 px-6 text-muted font-medium text-sm">Order #</th>
+                <th className="text-left py-4 px-6 text-muted font-medium text-sm">Customer</th>
+                <th className="text-left py-4 px-6 text-muted font-medium text-sm">Items</th>
+                <th className="text-left py-4 px-6 text-muted font-medium text-sm">Total</th>
+                <th className="text-left py-4 px-6 text-muted font-medium text-sm">Date</th>
+                <th className="text-left py-4 px-6 text-muted font-medium text-sm">Status</th>
+                <th className="text-right py-4 px-6 text-muted font-medium text-sm">Action</th>
               </tr>
             </thead>
             <tbody>
               {orders.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="text-center py-8 text-[#a09eb5]">No orders found.</td>
+                  <td colSpan={7} className="text-center py-8 text-muted">No orders found.</td>
                 </tr>
               ) : (
                 orders.map((order) => (
-                  <tr key={order.id} className="border-b border-white/5 hover:bg-white/5 transition-colors">
-                    <td className="py-4 px-6 text-white font-medium">#{order.id}</td>
+                  <tr key={order.id} className="border-b border-subtle hover:bg-hover transition-colors">
+                    <td className="py-4 px-6 text-main font-medium">#{order.id}</td>
                     <td className="py-4 px-6">
-                      <div className="text-white font-medium">{order.customer_name}</div>
-                      <div className="text-[#a09eb5] text-sm">{order.customer_phone}</div>
+                      <div className="text-main font-medium">{order.customer_name}</div>
+                      <div className="text-muted text-sm">{order.customer_phone}</div>
                     </td>
-                    <td className="py-4 px-6 text-white">{order.total_items} items</td>
+                    <td className="py-4 px-6 text-main">{order.total_items} items</td>
                     <td className="py-4 px-6 text-[#10b981] font-medium">{formatCurrency(order.total_amount)}</td>
-                    <td className="py-4 px-6 text-[#a09eb5] text-sm">{new Date(order.created_at).toLocaleString()}</td>
+                    <td className="py-4 px-6 text-muted text-sm">{new Date(order.created_at).toLocaleString()}</td>
                     <td className="py-4 px-6">{getStatusBadge(order.status)}</td>
                     <td className="py-4 px-6 text-right">
                       <button 
                         onClick={() => openOrderDetails(order.id)}
-                        className="p-2 text-[#a09eb5] hover:text-white hover:bg-white/10 rounded-lg transition-colors"
+                        className="p-2 text-muted hover:text-white hover:bg-white/10 rounded-lg transition-colors"
                         title="View Details"
                       >
                         <Eye className="w-5 h-5" />
@@ -214,13 +223,13 @@ export default function PharmacistOrdersTab() {
         
         {/* Pagination */}
         {!loading && !error && totalPages > 1 && (
-          <div className="p-4 border-t border-white/5 flex justify-center space-x-2">
+          <div className="p-4 border-t border-subtle flex justify-center space-x-2">
             {Array.from({ length: totalPages }).map((_, idx) => (
               <button
                 key={idx}
                 onClick={() => setPage(idx + 1)}
                 className={`w-8 h-8 rounded-lg flex items-center justify-center font-medium transition-colors ${
-                  page === idx + 1 ? 'bg-[#10b981] text-white' : 'bg-[#1a1825] text-[#a09eb5] hover:text-white'
+                  page === idx + 1 ? 'bg-[#10b981] text-main' : 'bg-base text-muted hover:text-main'
                 }`}
               >
                 {idx + 1}
@@ -233,18 +242,18 @@ export default function PharmacistOrdersTab() {
       {/* Order Details Modal */}
       {isViewModalOpen && selectedOrder && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-[#232136] rounded-2xl border border-white/10 w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
-            <div className="flex justify-between items-center p-6 border-b border-white/5">
+          <div className="bg-surface rounded-2xl border border-subtle-hover w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
+            <div className="flex justify-between items-center p-6 border-b border-subtle">
               <div>
-                <h2 className="text-2xl font-bold text-white flex items-center space-x-3">
+                <h2 className="text-2xl font-bold text-main flex items-center space-x-3">
                   <span>Order #{selectedOrder.id}</span>
                   {getStatusBadge(selectedOrder.status)}
                 </h2>
-                <p className="text-[#a09eb5] text-sm mt-1">{new Date(selectedOrder.created_at).toLocaleString()}</p>
+                <p className="text-muted text-sm mt-1">{new Date(selectedOrder.created_at).toLocaleString()}</p>
               </div>
               <button 
                 onClick={() => setIsViewModalOpen(false)}
-                className="text-[#a09eb5] hover:text-white transition-colors"
+                className="text-muted hover:text-main transition-colors"
               >
                 <XCircle className="w-6 h-6" />
               </button>
@@ -259,27 +268,27 @@ export default function PharmacistOrdersTab() {
               )}
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                <div className="bg-[#1a1825] p-5 rounded-xl border border-white/5">
-                  <h3 className="text-sm font-bold text-[#a09eb5] mb-4 uppercase tracking-wider">Customer Details</h3>
+                <div className="bg-base p-5 rounded-xl border border-subtle">
+                  <h3 className="text-sm font-bold text-muted mb-4 uppercase tracking-wider">Customer Details</h3>
                   <div className="space-y-2">
-                    <p className="text-white"><span className="text-[#a09eb5] mr-2">Name:</span> {selectedOrder.customer_name}</p>
-                    <p className="text-white"><span className="text-[#a09eb5] mr-2">Phone:</span> {selectedOrder.customer_phone}</p>
-                    <p className="text-white"><span className="text-[#a09eb5] mr-2">Email:</span> {selectedOrder.customer_email}</p>
-                    <p className="text-white"><span className="text-[#a09eb5] mr-2">Address:</span> {selectedOrder.customer_address}</p>
+                    <p className="text-main"><span className="text-muted mr-2">Name:</span> {selectedOrder.customer_name}</p>
+                    <p className="text-main"><span className="text-muted mr-2">Phone:</span> {selectedOrder.customer_phone}</p>
+                    <p className="text-main"><span className="text-muted mr-2">Email:</span> {selectedOrder.customer_email}</p>
+                    <p className="text-main"><span className="text-muted mr-2">Address:</span> {selectedOrder.customer_address}</p>
                   </div>
                 </div>
                 
-                <div className="bg-[#1a1825] p-5 rounded-xl border border-white/5">
-                  <h3 className="text-sm font-bold text-[#a09eb5] mb-4 uppercase tracking-wider">Order Summary</h3>
+                <div className="bg-base p-5 rounded-xl border border-subtle">
+                  <h3 className="text-sm font-bold text-muted mb-4 uppercase tracking-wider">Order Summary</h3>
                   <div className="space-y-2">
-                    <p className="text-white"><span className="text-[#a09eb5] mr-2">Payment Status:</span> 
+                    <p className="text-main"><span className="text-muted mr-2">Payment Status:</span> 
                       <span className={selectedOrder.payment_status === 'paid' ? 'text-[#10b981]' : 'text-yellow-400'}>
                         {selectedOrder.payment_status?.toUpperCase() || 'UNKNOWN'}
                       </span>
                     </p>
-                    <p className="text-white"><span className="text-[#a09eb5] mr-2">Delivery Method:</span> {selectedOrder.delivery_method}</p>
+                    <p className="text-main"><span className="text-muted mr-2">Delivery Method:</span> {selectedOrder.delivery_method}</p>
                     {selectedOrder.prescription_id && (
-                      <p className="text-white"><span className="text-[#a09eb5] mr-2">Prescription Status:</span> 
+                      <p className="text-main"><span className="text-muted mr-2">Prescription Status:</span> 
                         <span className={selectedOrder.prescription_status === 'approved' ? 'text-[#10b981]' : 'text-red-400'}>
                           {selectedOrder.prescription_status?.toUpperCase()}
                         </span>
@@ -289,38 +298,38 @@ export default function PharmacistOrdersTab() {
                 </div>
               </div>
 
-              <h3 className="text-lg font-bold text-white mb-4">Order Items</h3>
-              <div className="bg-[#1a1825] rounded-xl border border-white/5 overflow-hidden mb-8">
+              <h3 className="text-lg font-bold text-main mb-4">Order Items</h3>
+              <div className="bg-base rounded-xl border border-subtle overflow-hidden mb-8">
                 <table className="w-full">
                   <thead>
-                    <tr className="border-b border-white/5 bg-white/5">
-                      <th className="text-left py-3 px-4 text-[#a09eb5] font-medium text-sm">Product</th>
-                      <th className="text-center py-3 px-4 text-[#a09eb5] font-medium text-sm">Batch</th>
-                      <th className="text-center py-3 px-4 text-[#a09eb5] font-medium text-sm">Rx Req</th>
-                      <th className="text-right py-3 px-4 text-[#a09eb5] font-medium text-sm">Price</th>
-                      <th className="text-center py-3 px-4 text-[#a09eb5] font-medium text-sm">Qty Ordered</th>
-                      <th className="text-right py-3 px-4 text-[#a09eb5] font-medium text-sm">Total</th>
+                    <tr className="border-b border-subtle bg-hover">
+                      <th className="text-left py-3 px-4 text-muted font-medium text-sm">Product</th>
+                      <th className="text-center py-3 px-4 text-muted font-medium text-sm">Batch</th>
+                      <th className="text-center py-3 px-4 text-muted font-medium text-sm">Rx Req</th>
+                      <th className="text-right py-3 px-4 text-muted font-medium text-sm">Price</th>
+                      <th className="text-center py-3 px-4 text-muted font-medium text-sm">Qty Ordered</th>
+                      <th className="text-right py-3 px-4 text-muted font-medium text-sm">Total</th>
                     </tr>
                   </thead>
                   <tbody>
                     {selectedOrder.items?.map((item: any) => (
-                      <tr key={item.id} className="border-b border-white/5 last:border-0">
-                        <td className="py-3 px-4 text-white">{item.drug_name}</td>
-                        <td className="py-3 px-4 text-center text-[#a09eb5]">{item.batch_id}</td>
+                      <tr key={item.id} className="border-b border-subtle last:border-0">
+                        <td className="py-3 px-4 text-main">{item.drug_name}</td>
+                        <td className="py-3 px-4 text-center text-muted">{item.batch_id}</td>
                         <td className="py-3 px-4 text-center">
                           {item.requires_prescription ? (
                             <span className="text-red-400 text-xs font-bold border border-red-400/30 px-2 py-0.5 rounded">Rx</span>
                           ) : '-'}
                         </td>
-                        <td className="py-3 px-4 text-right text-white">{formatCurrency(item.unit_price)}</td>
+                        <td className="py-3 px-4 text-right text-main">{formatCurrency(item.unit_price)}</td>
                         <td className="py-3 px-4 text-center font-bold text-[#10b981]">{item.quantity}</td>
-                        <td className="py-3 px-4 text-right text-white">{formatCurrency((item.unit_price * item.quantity) - (item.discount || 0))}</td>
+                        <td className="py-3 px-4 text-right text-main">{formatCurrency((item.unit_price * item.quantity) - (item.discount || 0))}</td>
                       </tr>
                     ))}
                   </tbody>
                   <tfoot>
-                    <tr className="bg-white/5 font-bold">
-                      <td colSpan={5} className="py-4 px-4 text-right text-white">Grand Total:</td>
+                    <tr className="bg-hover font-bold">
+                      <td colSpan={5} className="py-4 px-4 text-right text-main">Grand Total:</td>
                       <td className="py-4 px-4 text-right text-[#10b981] text-lg">{formatCurrency(selectedOrder.total_amount)}</td>
                     </tr>
                   </tfoot>
@@ -328,8 +337,8 @@ export default function PharmacistOrdersTab() {
               </div>
 
               {/* Action Area depending on status */}
-              <div className="bg-[#1a1825] rounded-xl border border-white/5 p-6 flex flex-col items-center justify-center space-y-4">
-                <h3 className="text-white font-bold text-lg mb-2">Actions</h3>
+              <div className="bg-base rounded-xl border border-subtle p-6 flex flex-col items-center justify-center space-y-4">
+                <h3 className="text-main font-bold text-lg mb-2">Actions</h3>
                 
                 {selectedOrder.status === 'pending' || selectedOrder.status === 'placed' || selectedOrder.status === 'pending_prescription' ? (
                   isRejecting ? (
@@ -339,7 +348,7 @@ export default function PharmacistOrdersTab() {
                         value={rejectionReason}
                         onChange={(e) => setRejectionReason(e.target.value)}
                         placeholder="Enter rejection reason..."
-                        className="w-full bg-[#232136] border border-red-500/30 rounded-xl py-3 px-4 text-white focus:outline-none focus:border-red-500"
+                        className="w-full bg-surface border border-red-500/30 rounded-xl py-3 px-4 text-main focus:outline-none focus:border-red-500"
                       />
                       <div className="flex space-x-3">
                         <button 
@@ -363,7 +372,7 @@ export default function PharmacistOrdersTab() {
                       <button 
                         onClick={() => handleStatusUpdate('confirmed')}
                         disabled={actionLoading}
-                        className="flex items-center space-x-2 bg-[#10b981] hover:bg-[#059669] text-white px-6 py-3 rounded-xl font-medium transition-colors disabled:opacity-50"
+                        className="flex items-center space-x-2 bg-[#10b981] hover:bg-[#059669] text-main px-6 py-3 rounded-xl font-medium transition-colors disabled:opacity-50"
                       >
                         <CheckCircle className="w-5 h-5" />
                         <span>Confirm Order</span>
@@ -400,13 +409,13 @@ export default function PharmacistOrdersTab() {
                   <button 
                     onClick={() => handleStatusUpdate('completed')}
                     disabled={actionLoading}
-                    className="flex items-center space-x-2 bg-[#10b981] hover:bg-[#059669] text-white px-6 py-3 rounded-xl font-medium transition-colors disabled:opacity-50"
+                    className="flex items-center space-x-2 bg-[#10b981] hover:bg-[#059669] text-main px-6 py-3 rounded-xl font-medium transition-colors disabled:opacity-50"
                   >
                     <CheckCircle className="w-5 h-5" />
                     <span>Complete & Fulfil</span>
                   </button>
                 ) : (
-                  <p className="text-[#a09eb5]">No further actions available for this state.</p>
+                  <p className="text-muted">No further actions available for this state.</p>
                 )}
               </div>
             </div>

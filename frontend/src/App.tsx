@@ -3,16 +3,17 @@ import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'r
 import AuthPage from './pages/Login';
 
 import AdminDashboard from './pages/admin/AdminDashboard';
-import StaffDashboard from './pages/staff/StaffDashboard';
 import PharmacistDashboard from './pages/pharmacist/PharmacistDashboard';
 
 import CustomerDashboard from './pages/customer/CustomerDashboard';
 
 import { ProtectedRoute } from './components/ProtectedRoute';
+import { ThemeProvider } from './context/ThemeContext';
 
 function App() {
   return (
-    <Router>
+    <ThemeProvider>
+      <Router>
       <Routes>
         {/* Root redirects to Login */}
         <Route path="/" element={<Navigate to="/login" replace />} />
@@ -22,11 +23,6 @@ function App() {
         <Route path="/admin/*" element={
           <ProtectedRoute allowedRoles={['admin']}>
             <AdminDashboard />
-          </ProtectedRoute>
-        } />
-        <Route path="/inventory/*" element={
-          <ProtectedRoute allowedRoles={['staff', 'inventory_staff']}>
-            <StaffDashboard />
           </ProtectedRoute>
         } />
         <Route path="/pharmacist/*" element={
@@ -43,7 +39,8 @@ function App() {
         {/* Fallback */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
-    </Router>
+      </Router>
+    </ThemeProvider>
   );
 }
 

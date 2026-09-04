@@ -3,7 +3,7 @@ import { Search, ShoppingCart, Plus, Minus, Trash2, Check, AlertTriangle, Pill, 
 import { inventoryApi, salesApi, customerApi, promotionApi } from '../../services/api';
 import ReceiptModal from '../../components/ReceiptModal';
 
-export default function PharmacistPOSTab() {
+export default function PharmacistPOSTab({ navigationContext }: { navigationContext?: any }) {
   const [drugs, setDrugs] = useState<any[]>([]);
   const [customers, setCustomers] = useState<any[]>([]);
   const [promotions, setPromotions] = useState<any[]>([]);
@@ -36,8 +36,8 @@ export default function PharmacistPOSTab() {
         promotionApi.getPromotions({ status: 'active' }).catch(() => [])
       ]);
       
-      setDrugs(inventoryRes);
-      setCustomers(customersRes);
+      setDrugs(Array.isArray(inventoryRes) ? inventoryRes : (inventoryRes.data || []));
+      setCustomers(Array.isArray(customersRes) ? customersRes : (customersRes.data || []));
       setPromotions(promotionsRes);
     } catch (err: any) {
       setError(err.message || 'Failed to load POS data');
@@ -48,8 +48,7 @@ export default function PharmacistPOSTab() {
 
   const filteredDrugs = useMemo(() => {
     return drugs.filter(drug => 
-      drug.is_active && 
-      drug.total_stock > 0 &&
+      drug.stock > 0 &&
       (drug.name.toLowerCase().includes(search.toLowerCase()) || 
        (drug.generic_name && drug.generic_name.toLowerCase().includes(search.toLowerCase())))
     );
@@ -59,7 +58,7 @@ export default function PharmacistPOSTab() {
     setCart(prev => {
       const existing = prev.find(item => item.id === drug.id);
       if (existing) {
-        if (existing.quantity >= drug.total_stock) return prev; // Prevent exceeding stock
+        if (existing.quantity >= drug.stock) return prev; // Prevent exceeding stock
         return prev.map(item => 
           item.id === drug.id 
             ? { ...item, quantity: item.quantity + 1 }
@@ -189,54 +188,54 @@ export default function PharmacistPOSTab() {
   };
 
   return (
-    <div className="flex h-full flex-col lg:flex-row overflow-hidden bg-[#110f22]">
+    <div className="flex h-full flex-col lg:flex-row overflow-hidden bg-base">
       
       {/* Receipt Modal */}
       <ReceiptModal 
         isOpen={showReceipt} 
         onClose={() => setShowReceipt(false)} 
         saleData={completedSale} 
-        pharmacyInfo={{ name: 'Antigravity Pharmacy', address: '123 Health Ave', phone: '+1 234 567 8900' }}
+        pharmacyInfo={{ name: 'Other Pharmacy', address: '456 Other St', phone: '+1 000 000 0000' }}
       />
 
       {/* Left Column: Drug Search */}
-      <div className="flex-1 flex flex-col border-r border-white/5 overflow-hidden">
+      <div className="flex-1 flex flex-col border-r border-subtle overflow-hidden">
         <div className="p-6 pb-4">
-          <h1 className="text-2xl font-bold text-white mb-4">Point of Sale</h1>
+          <h1 className="text-2xl font-bold text-main mb-4">Point of Sale</h1>
           <div className="relative">
-            <Search className="w-5 h-5 text-[#a09eb5] absolute left-4 top-1/2 -translate-y-1/2" />
+            <Search className="w-5 h-5 text-muted absolute left-4 top-1/2 -translate-y-1/2" />
             <input 
               type="text" 
               placeholder="Search medicines by name or generic name..." 
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full bg-[#232136] border border-white/10 text-white rounded-xl pl-12 pr-4 py-3 focus:outline-none focus:border-[#10b981] transition-colors"
+              className="w-full bg-surface border border-subtle-hover text-main rounded-xl pl-12 pr-4 py-3 focus:outline-none focus:border-[#10b981] transition-colors"
             />
           </div>
         </div>
 
         <div className="flex-1 overflow-y-auto p-6 pt-0">
           {loading ? (
-            <div className="text-center text-[#a09eb5] py-10">Loading catalog...</div>
+            <div className="text-center text-muted py-10">Loading catalog...</div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
               {filteredDrugs.map(drug => (
                 <div 
                   key={drug.id} 
                   onClick={() => addToCart(drug)}
-                  className="bg-[#232136] border border-white/5 p-4 rounded-2xl cursor-pointer hover:border-[#10b981]/50 hover:bg-white/5 transition-all group"
+                  className="bg-surface border border-subtle p-4 rounded-2xl cursor-pointer hover:border-[#10b981]/50 hover:bg-hover transition-all group"
                 >
                   <div className="flex justify-between items-start mb-2">
-                    <div className="p-2 bg-[#110f22] rounded-lg text-[#10b981]">
+                    <div className="p-2 bg-base rounded-lg text-[#10b981]">
                       <Pill className="w-5 h-5" />
                     </div>
                     <div className="text-right">
-                      <div className="text-lg font-bold text-white">${Number(drug.price).toFixed(2)}</div>
-                      <div className="text-xs text-[#a09eb5]">Available: {drug.total_stock}</div>
+                      <div className="text-lg font-bold text-main">${Number(drug.price).toFixed(2)}</div>
+                      <div className="text-xs text-muted">Available: {drug.total_stock}</div>
                     </div>
                   </div>
-                  <div className="font-semibold text-white mb-1 group-hover:text-[#10b981] transition-colors line-clamp-1">{drug.name}</div>
-                  <div className="text-xs text-[#a09eb5] line-clamp-1 mb-3">{drug.generic_name}</div>
+                  <div className="font-semibold text-main mb-1 group-hover:text-[#10b981] transition-colors line-clamp-1">{drug.name}</div>
+                  <div className="text-xs text-muted line-clamp-1 mb-3">{drug.generic_name}</div>
                   {drug.requires_prescription && (
                     <span className="bg-orange-500/10 text-orange-400 text-[10px] px-2 py-1 rounded-full font-medium uppercase tracking-wider">
                       Rx Required
@@ -250,9 +249,9 @@ export default function PharmacistPOSTab() {
       </div>
 
       {/* Right Column: Cart */}
-      <div className="w-full lg:w-[450px] bg-[#232136] flex flex-col overflow-hidden shadow-2xl z-10">
-        <div className="p-6 border-b border-white/5 flex justify-between items-center bg-[#1a1825]">
-          <h2 className="text-xl font-bold text-white flex items-center">
+      <div className="w-full lg:w-[450px] bg-surface flex flex-col overflow-hidden shadow-2xl z-10">
+        <div className="p-6 border-b border-subtle flex justify-between items-center bg-base">
+          <h2 className="text-xl font-bold text-main flex items-center">
             <ShoppingCart className="w-5 h-5 mr-2 text-[#10b981]" />
             Current Sale
           </h2>
@@ -274,20 +273,20 @@ export default function PharmacistPOSTab() {
         {/* Cart Items */}
         <div className="flex-1 overflow-y-auto p-6 space-y-4">
           {cart.length === 0 ? (
-            <div className="text-center text-[#a09eb5] py-10 flex flex-col items-center">
+            <div className="text-center text-muted py-10 flex flex-col items-center">
               <ShoppingCart className="w-12 h-12 mb-3 opacity-20" />
               <p>Your cart is empty.</p>
               <p className="text-sm mt-1">Select items from the left to begin.</p>
             </div>
           ) : (
             cart.map(item => (
-              <div key={item.id} className="bg-[#110f22] p-4 rounded-xl border border-white/5 relative group">
+              <div key={item.id} className="bg-base p-4 rounded-xl border border-subtle relative group">
                 <div className="flex justify-between items-start mb-3">
                   <div>
-                    <div className="font-semibold text-white text-sm">{item.name}</div>
-                    <div className="text-xs text-[#a09eb5]">${Number(item.price).toFixed(2)} each</div>
+                    <div className="font-semibold text-main text-sm">{item.name}</div>
+                    <div className="text-xs text-muted">${Number(item.price).toFixed(2)} each</div>
                   </div>
-                  <div className="text-right font-bold text-white text-sm">
+                  <div className="text-right font-bold text-main text-sm">
                     ${(item.price * item.quantity).toFixed(2)}
                   </div>
                 </div>
@@ -299,7 +298,7 @@ export default function PharmacistPOSTab() {
                       type="checkbox" 
                       checked={item.prescription_verified}
                       onChange={() => togglePrescriptionVerified(item.id)}
-                      className="rounded border-orange-500/50 bg-[#110f22] text-orange-500 focus:ring-orange-500/20"
+                      className="rounded border-orange-500/50 bg-base text-orange-500 focus:ring-orange-500/20"
                     />
                     <span className="text-xs font-medium text-orange-400 select-none">
                       Verify Physical Prescription
@@ -308,17 +307,17 @@ export default function PharmacistPOSTab() {
                 )}
 
                 <div className="flex justify-between items-center">
-                  <div className="flex items-center space-x-3 bg-[#232136] rounded-lg p-1 border border-white/5">
+                  <div className="flex items-center space-x-3 bg-surface rounded-lg p-1 border border-subtle">
                     <button 
                       onClick={() => updateQuantity(item.id, -1)}
-                      className="w-7 h-7 rounded-md flex items-center justify-center text-[#a09eb5] hover:bg-white/5 hover:text-white transition-colors"
+                      className="w-7 h-7 rounded-md flex items-center justify-center text-muted hover:bg-hover hover:text-main transition-colors"
                     >
                       <Minus className="w-4 h-4" />
                     </button>
-                    <span className="w-6 text-center text-sm font-medium text-white">{item.quantity}</span>
+                    <span className="w-6 text-center text-sm font-medium text-main">{item.quantity}</span>
                     <button 
                       onClick={() => updateQuantity(item.id, 1)}
-                      className="w-7 h-7 rounded-md flex items-center justify-center text-[#a09eb5] hover:bg-white/5 hover:text-white transition-colors"
+                      className="w-7 h-7 rounded-md flex items-center justify-center text-muted hover:bg-hover hover:text-main transition-colors"
                     >
                       <Plus className="w-4 h-4" />
                     </button>
@@ -336,7 +335,7 @@ export default function PharmacistPOSTab() {
         </div>
 
         {/* Checkout Section */}
-        <div className="p-6 bg-[#1a1825] border-t border-white/5">
+        <div className="p-6 bg-base border-t border-subtle">
           {/* Customer & Promo Selection */}
           <div className="space-y-3 mb-6">
             <div className="flex space-x-3">
@@ -344,7 +343,7 @@ export default function PharmacistPOSTab() {
                 <select 
                   value={selectedCustomer}
                   onChange={(e) => setSelectedCustomer(e.target.value)}
-                  className="w-full bg-[#110f22] border border-white/10 text-white rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-[#10b981]"
+                  className="w-full bg-base border border-subtle-hover text-main rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-[#10b981]"
                 >
                   <option value="">Walk-in Customer</option>
                   {customers.map(c => (
@@ -356,7 +355,7 @@ export default function PharmacistPOSTab() {
                 <select 
                   value={selectedPromotion}
                   onChange={(e) => setSelectedPromotion(e.target.value)}
-                  className="w-full bg-[#110f22] border border-white/10 text-white rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-[#10b981]"
+                  className="w-full bg-base border border-subtle-hover text-main rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-[#10b981]"
                 >
                   <option value="">No Promotion</option>
                   {promotions.map(p => (
@@ -372,7 +371,7 @@ export default function PharmacistPOSTab() {
                 className={`flex-1 py-2 text-sm font-medium rounded-xl border transition-all ${
                   paymentMethod === 'cash' 
                     ? 'bg-[#10b981]/10 border-[#10b981] text-[#10b981]' 
-                    : 'bg-[#110f22] border-white/10 text-[#a09eb5] hover:bg-white/5'
+                    : 'bg-base border-subtle-hover text-muted hover:bg-hover'
                 }`}
               >
                 Cash
@@ -382,7 +381,7 @@ export default function PharmacistPOSTab() {
                 className={`flex-1 py-2 text-sm font-medium rounded-xl border transition-all ${
                   paymentMethod === 'card' 
                     ? 'bg-[#3b82f6]/10 border-[#3b82f6] text-[#3b82f6]' 
-                    : 'bg-[#110f22] border-white/10 text-[#a09eb5] hover:bg-white/5'
+                    : 'bg-base border-subtle-hover text-muted hover:bg-hover'
                 }`}
               >
                 Card
@@ -391,20 +390,20 @@ export default function PharmacistPOSTab() {
             
             {paymentMethod === 'cash' && cart.length > 0 && (
               <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#a09eb5] text-sm">$</span>
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted text-sm">$</span>
                 <input 
                   type="number"
                   placeholder="Amount Paid"
                   value={amountPaid}
                   onChange={(e) => setAmountPaid(e.target.value ? Number(e.target.value) : '')}
-                  className="w-full bg-[#110f22] border border-white/10 text-white rounded-xl pl-7 pr-3 py-2 text-sm focus:outline-none focus:border-[#10b981]"
+                  className="w-full bg-base border border-subtle-hover text-main rounded-xl pl-7 pr-3 py-2 text-sm focus:outline-none focus:border-[#10b981]"
                 />
               </div>
             )}
           </div>
 
           <div className="space-y-2 mb-6">
-            <div className="flex justify-between text-sm text-[#a09eb5]">
+            <div className="flex justify-between text-sm text-muted">
               <span>Subtotal</span>
               <span>${subtotal.toFixed(2)}</span>
             </div>
@@ -414,7 +413,7 @@ export default function PharmacistPOSTab() {
                 <span>-${discountAmount.toFixed(2)}</span>
               </div>
             )}
-            <div className="flex justify-between text-2xl font-bold text-white pt-2 border-t border-white/5">
+            <div className="flex justify-between text-2xl font-bold text-main pt-2 border-t border-subtle">
               <span>Total</span>
               <span>${total.toFixed(2)}</span>
             </div>
@@ -430,7 +429,7 @@ export default function PharmacistPOSTab() {
           <button 
             onClick={handleCheckout}
             disabled={cart.length === 0 || isProcessing || (paymentMethod === 'cash' && amountPaid !== '' && Number(amountPaid) < total)}
-            className={`w-full py-4 rounded-xl font-bold text-white shadow-lg transition-all flex items-center justify-center gap-2 ${
+            className={`w-full py-4 rounded-xl font-bold text-main shadow-lg transition-all flex items-center justify-center gap-2 ${
               cart.length === 0 || isProcessing || (paymentMethod === 'cash' && amountPaid !== '' && Number(amountPaid) < total)
                 ? 'bg-[#10b981]/50 cursor-not-allowed opacity-70'
                 : 'bg-[#10b981] hover:bg-[#059669] hover:-translate-y-1 hover:shadow-[#10b981]/25'

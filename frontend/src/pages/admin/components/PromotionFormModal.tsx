@@ -153,12 +153,12 @@ export default function PromotionFormModal({ isOpen, onClose, promotionData, isE
 
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center p-4 bg-black/60 backdrop-blur-sm overflow-y-auto">
-      <div className="bg-[#232136] rounded-2xl w-full max-w-2xl border border-white/10 shadow-2xl my-8">
-        <div className="flex items-center justify-between p-6 border-b border-white/5">
-          <h2 className="text-xl font-bold text-white">
+      <div className="bg-surface rounded-2xl w-full max-w-2xl border border-subtle-hover shadow-2xl my-8">
+        <div className="flex items-center justify-between p-6 border-b border-subtle">
+          <h2 className="text-xl font-bold text-main">
             {isEdit ? 'Edit Promotion' : 'Create Promotion'}
           </h2>
-          <button onClick={onClose} className="p-2 text-[#a09eb5] hover:text-white transition-colors rounded-xl hover:bg-white/5">
+          <button onClick={onClose} className="p-2 text-muted hover:text-main transition-colors rounded-xl hover:bg-hover">
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -173,33 +173,33 @@ export default function PromotionFormModal({ isOpen, onClose, promotionData, isE
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="md:col-span-2">
-              <label className="block text-sm font-bold text-[#a09eb5] mb-2">Promotion Name *</label>
+              <label className="block text-sm font-bold text-muted mb-2">Promotion Name *</label>
               <input
                 required
                 type="text"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="w-full bg-[#110f22] border border-white/5 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#9b51e0] transition-colors"
+                className="w-full bg-base border border-subtle rounded-xl px-4 py-3 text-main focus:outline-none focus:border-[#9b51e0] transition-colors"
                 placeholder="e.g. Summer Health Sale"
               />
             </div>
             
             <div className="md:col-span-2">
-              <label className="block text-sm font-bold text-[#a09eb5] mb-2">Description</label>
+              <label className="block text-sm font-bold text-muted mb-2">Description</label>
               <textarea
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                className="w-full bg-[#110f22] border border-white/5 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#9b51e0] transition-colors min-h-[80px]"
+                className="w-full bg-base border border-subtle rounded-xl px-4 py-3 text-main focus:outline-none focus:border-[#9b51e0] transition-colors min-h-[80px]"
                 placeholder="Brief details about the promotion..."
               />
             </div>
 
             <div>
-              <label className="block text-sm font-bold text-[#a09eb5] mb-2">Discount Type *</label>
+              <label className="block text-sm font-bold text-muted mb-2">Discount Type *</label>
               <select
                 value={formData.discount_type}
                 onChange={(e) => setFormData({ ...formData, discount_type: e.target.value })}
-                className="w-full bg-[#110f22] border border-white/5 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#9b51e0] appearance-none"
+                className="w-full bg-base border border-subtle rounded-xl px-4 py-3 text-main focus:outline-none focus:border-[#9b51e0] appearance-none"
               >
                 <option value="percentage">Percentage (%)</option>
                 <option value="fixed">Fixed Amount ($)</option>
@@ -207,7 +207,7 @@ export default function PromotionFormModal({ isOpen, onClose, promotionData, isE
             </div>
 
             <div>
-              <label className="block text-sm font-bold text-[#a09eb5] mb-2">Discount Value *</label>
+              <label className="block text-sm font-bold text-muted mb-2">Discount Value *</label>
               <input
                 required
                 type="number"
@@ -215,37 +215,37 @@ export default function PromotionFormModal({ isOpen, onClose, promotionData, isE
                 min="0.01"
                 value={formData.discount_value}
                 onChange={(e) => setFormData({ ...formData, discount_value: e.target.value })}
-                className="w-full bg-[#110f22] border border-white/5 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#9b51e0] transition-colors"
+                className="w-full bg-base border border-subtle rounded-xl px-4 py-3 text-main focus:outline-none focus:border-[#9b51e0] transition-colors"
                 placeholder={formData.discount_type === 'percentage' ? 'e.g. 15' : 'e.g. 10.00'}
               />
             </div>
 
-            <div className="md:col-span-2 border-t border-white/5 pt-6">
-              <h3 className="text-white font-bold mb-4">Applicability</h3>
+            <div className="md:col-span-2 border-t border-subtle pt-6">
+              <h3 className="text-main font-bold mb-4">Applicability</h3>
               
               <div className="flex gap-4 mb-4">
-                <label className="flex items-center space-x-2 text-[#a09eb5] cursor-pointer">
-                  <input type="radio" checked={formData.apply_to === 'all'} onChange={() => setFormData({ ...formData, apply_to: 'all', category_ids: [], drug_ids: [] })} className="text-[#9b51e0] focus:ring-[#9b51e0] bg-[#110f22]" />
+                <label className="flex items-center space-x-2 text-muted cursor-pointer">
+                  <input type="radio" checked={formData.apply_to === 'all'} onChange={() => setFormData({ ...formData, apply_to: 'all', category_ids: [], drug_ids: [] })} className="text-[#9b51e0] focus:ring-[#9b51e0] bg-base" />
                   <span>All Products</span>
                 </label>
-                <label className="flex items-center space-x-2 text-[#a09eb5] cursor-pointer">
-                  <input type="radio" checked={formData.apply_to === 'categories'} onChange={() => setFormData({ ...formData, apply_to: 'categories', drug_ids: [] })} className="text-[#9b51e0] focus:ring-[#9b51e0] bg-[#110f22]" />
+                <label className="flex items-center space-x-2 text-muted cursor-pointer">
+                  <input type="radio" checked={formData.apply_to === 'categories'} onChange={() => setFormData({ ...formData, apply_to: 'categories', drug_ids: [] })} className="text-[#9b51e0] focus:ring-[#9b51e0] bg-base" />
                   <span>Specific Categories</span>
                 </label>
-                <label className="flex items-center space-x-2 text-[#a09eb5] cursor-pointer">
-                  <input type="radio" checked={formData.apply_to === 'drugs'} onChange={() => setFormData({ ...formData, apply_to: 'drugs', category_ids: [] })} className="text-[#9b51e0] focus:ring-[#9b51e0] bg-[#110f22]" />
+                <label className="flex items-center space-x-2 text-muted cursor-pointer">
+                  <input type="radio" checked={formData.apply_to === 'drugs'} onChange={() => setFormData({ ...formData, apply_to: 'drugs', category_ids: [] })} className="text-[#9b51e0] focus:ring-[#9b51e0] bg-base" />
                   <span>Specific Drugs</span>
                 </label>
               </div>
 
               {formData.apply_to === 'categories' && (
                 <div>
-                  <label className="block text-sm font-bold text-[#a09eb5] mb-2">Select Categories (Hold Ctrl/Cmd to select multiple)</label>
+                  <label className="block text-sm font-bold text-muted mb-2">Select Categories (Hold Ctrl/Cmd to select multiple)</label>
                   <select
                     multiple
                     value={formData.category_ids.map(String)}
                     onChange={(e) => handleMultiSelect(e, 'category_ids')}
-                    className="w-full bg-[#110f22] border border-white/5 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#9b51e0] h-32"
+                    className="w-full bg-base border border-subtle rounded-xl px-4 py-3 text-main focus:outline-none focus:border-[#9b51e0] h-32"
                   >
                     {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                   </select>
@@ -254,12 +254,12 @@ export default function PromotionFormModal({ isOpen, onClose, promotionData, isE
 
               {formData.apply_to === 'drugs' && (
                 <div>
-                  <label className="block text-sm font-bold text-[#a09eb5] mb-2">Select Drugs (Hold Ctrl/Cmd to select multiple)</label>
+                  <label className="block text-sm font-bold text-muted mb-2">Select Drugs (Hold Ctrl/Cmd to select multiple)</label>
                   <select
                     multiple
                     value={formData.drug_ids.map(String)}
                     onChange={(e) => handleMultiSelect(e, 'drug_ids')}
-                    className="w-full bg-[#110f22] border border-white/5 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#9b51e0] h-48"
+                    className="w-full bg-base border border-subtle rounded-xl px-4 py-3 text-main focus:outline-none focus:border-[#9b51e0] h-48"
                   >
                     {drugs.map(d => <option key={d.id} value={d.id}>{d.name} ({d.generic_name})</option>)}
                   </select>
@@ -267,36 +267,36 @@ export default function PromotionFormModal({ isOpen, onClose, promotionData, isE
               )}
             </div>
 
-            <div className="md:col-span-2 border-t border-white/5 pt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="md:col-span-2 border-t border-subtle pt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-bold text-[#a09eb5] mb-2">Start Date *</label>
+                <label className="block text-sm font-bold text-muted mb-2">Start Date *</label>
                 <input
                   required
                   type="date"
                   value={formData.start_date}
                   onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
-                  className="w-full bg-[#110f22] border border-white/5 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#9b51e0]"
+                  className="w-full bg-base border border-subtle rounded-xl px-4 py-3 text-main focus:outline-none focus:border-[#9b51e0]"
                 />
               </div>
               
               <div>
-                <label className="block text-sm font-bold text-[#a09eb5] mb-2">End Date *</label>
+                <label className="block text-sm font-bold text-muted mb-2">End Date *</label>
                 <input
                   required
                   type="date"
                   value={formData.end_date}
                   onChange={(e) => setFormData({ ...formData, end_date: e.target.value })}
-                  className="w-full bg-[#110f22] border border-white/5 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#9b51e0]"
+                  className="w-full bg-base border border-subtle rounded-xl px-4 py-3 text-main focus:outline-none focus:border-[#9b51e0]"
                 />
               </div>
             </div>
 
             <div className="md:col-span-2">
-              <label className="block text-sm font-bold text-[#a09eb5] mb-2">Status</label>
+              <label className="block text-sm font-bold text-muted mb-2">Status</label>
               <select
                 value={formData.status}
                 onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                className="w-full bg-[#110f22] border border-white/5 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#9b51e0] appearance-none"
+                className="w-full bg-base border border-subtle rounded-xl px-4 py-3 text-main focus:outline-none focus:border-[#9b51e0] appearance-none"
               >
                 <option value="draft">Draft</option>
                 <option value="active">Active (If within dates)</option>
@@ -305,12 +305,12 @@ export default function PromotionFormModal({ isOpen, onClose, promotionData, isE
             </div>
           </div>
 
-          <div className="flex justify-end space-x-4 pt-6 border-t border-white/5">
+          <div className="flex justify-end space-x-4 pt-6 border-t border-subtle">
             <button
               type="button"
               onClick={onClose}
               disabled={loading}
-              className="px-6 py-3 text-[#a09eb5] hover:text-white transition-colors font-medium"
+              className="px-6 py-3 text-muted hover:text-main transition-colors font-medium"
             >
               Cancel
             </button>

@@ -3,7 +3,7 @@ CREATE TABLE IF NOT EXISTS users (
     id              INT AUTO_INCREMENT PRIMARY KEY,
     username        VARCHAR(100) NOT NULL UNIQUE,
     password_hash   VARCHAR(255) NOT NULL,
-    role            ENUM('admin','pharmacist','inventory_staff') NOT NULL,
+    role            ENUM('admin','pharmacist') NOT NULL,
     created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -225,3 +225,17 @@ INSERT IGNORE INTO settings (setting_key, setting_value, setting_type) VALUES
 ('notify_new_order', 'true', 'boolean'),
 ('notify_prescription', 'true', 'boolean'),
 ('session_timeout', '60', 'number');
+
+-- customer notifications (§3.15)
+CREATE TABLE IF NOT EXISTS customer_notifications (
+    id              INT AUTO_INCREMENT PRIMARY KEY,
+    customer_id     INT NOT NULL,
+    type            ENUM('ORDER', 'PRESCRIPTION', 'PAYMENT', 'PROMOTION', 'ACCOUNT', 'SYSTEM') NOT NULL,
+    title           VARCHAR(255) NOT NULL,
+    message         TEXT NOT NULL,
+    related_id      INT,
+    is_read         BOOLEAN DEFAULT FALSE,
+    created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (customer_id) REFERENCES customers(id) ON DELETE CASCADE,
+    INDEX idx_customer_created (customer_id, created_at DESC)
+);

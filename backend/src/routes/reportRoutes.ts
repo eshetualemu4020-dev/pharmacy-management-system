@@ -12,17 +12,18 @@ import { requireAuth, requireRole } from '../middleware/auth';
 
 const router = Router();
 
-// Apply auth middleware to all report routes, restricting to admin
+// Apply auth middleware to all report routes
 router.use(requireAuth);
-router.use(requireRole(['admin']));
 
-// Report endpoints
-router.get('/dashboard', getDashboardSummary);
-router.get('/sales', getSalesReport);
-router.get('/inventory', getInventoryReport);
-router.get('/orders', getOrderReport);
-router.get('/prescriptions', getPrescriptionReport);
-router.get('/products', getProductReport);
-router.get('/customers', getCustomerReport);
+// Admin-only dashboards (contains sensitive high-level financials)
+router.get('/dashboard', requireRole(['admin']), getDashboardSummary);
+router.get('/customers', requireRole(['admin']), getCustomerReport);
+
+// Operational reports (admin + pharmacist)
+router.get('/sales', requireRole(['admin', 'pharmacist']), getSalesReport);
+router.get('/inventory', requireRole(['admin', 'pharmacist']), getInventoryReport);
+router.get('/orders', requireRole(['admin', 'pharmacist']), getOrderReport);
+router.get('/prescriptions', requireRole(['admin', 'pharmacist']), getPrescriptionReport);
+router.get('/products', requireRole(['admin', 'pharmacist']), getProductReport);
 
 export default router;

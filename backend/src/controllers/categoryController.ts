@@ -4,7 +4,7 @@ import { RowDataPacket } from 'mysql2';
 
 export const getCategories = async (req: Request, res: Response): Promise<any> => {
     try {
-        const { search, status } = req.query;
+        const { search, status, page, limit, sortField, sortOrder } = req.query;
 
         let query = `
             SELECT c.id, c.name, c.description, c.status, c.created_at, COUNT(d.id) AS drugCount
@@ -18,15 +18,46 @@ export const getCategories = async (req: Request, res: Response): Promise<any> =
             query += ' AND c.name LIKE ?';
             params.push(`%${search}%`);
         }
-        if (status) {
+        if (status && status !== 'all') {
             query += ' AND c.status = ?';
             params.push(status);
         }
 
-        query += ' GROUP BY c.id ORDER BY c.created_at DESC';
+        query += ' GROUP BY c.id';
 
-        const [categories] = await db.query<RowDataPacket[]>(query, params);
-        res.json(categories);
+        // Sorting
+        const validSortFields = ['name', 'created_at', 'status', 'drugCount'];
+        const sort = validSortFields.includes(sortField as string) ? sortField : 'created_at';
+        const order = sortOrder === 'asc' ? 'ASC' : 'DESC';
+        query += ` ORDER BY ${sort} ${order}`;
+
+        // If pagination is requested, return paginated structure
+        if (page && limit) {
+            const pageNum = parseInt(page as string) || 1;
+            const limitNum = parseInt(limit as string) || 10;
+            const offset = (pageNum - 1) * limitNum;
+
+            // Get total count for pagination (need a wrapper query because of GROUP BY)
+            const countQuery = `SELECT COUNT(*) as total FROM (${query}) AS subquery`;
+            const [countResult] = await db.query<RowDataPacket[]>(countQuery, params);
+            const total = countResult[0].total;
+
+            query += ' LIMIT ? OFFSET ?';
+            params.push(limitNum, offset);
+
+            const [categories] = await db.query<RowDataPacket[]>(query, params);
+
+            return res.json({
+                data: categories,
+                total,
+                page: pageNum,
+                totalPages: Math.ceil(total / limitNum)
+            });
+        } else {
+            // Backward compatibility: return array
+            const [categories] = await db.query<RowDataPacket[]>(query, params);
+            return res.json(categories);
+        }
     } catch (error) {
         console.error('Error fetching categories:', error);
         res.status(500).json({ error: 'Failed to fetch categories' });
@@ -50,7 +81,7 @@ export const getCategoryById = async (req: Request, res: Response): Promise<any>
         
         // Also fetch assigned drugs
         const [drugs] = await db.query<RowDataPacket[]>(
-            'SELECT id, name, generic_name, qty, price, status as drug_status FROM drugs WHERE category_id = ?',
+            'SELECT id, name, generic_name, stock as qty, price, is_active as drug_status FROM drugs WHERE category_id = ?',
             [id]
         );
 

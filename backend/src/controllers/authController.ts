@@ -79,7 +79,7 @@ export const register = async (req: Request, res: Response): Promise<any> => {
         const hashedPassword = await bcrypt.hash(password, 10);
         
         // Accept role from frontend if valid, otherwise default to 'customer'
-        const validRoles = ['customer', 'admin', 'pharmacist', 'staff', 'inventory_staff'];
+        const validRoles = ['customer', 'admin', 'pharmacist', 'staff'];
         const userRole = validRoles.includes(role) ? role : 'customer';
 
         if (userRole === 'customer') {
@@ -88,7 +88,7 @@ export const register = async (req: Request, res: Response): Promise<any> => {
                 [name, email, hashedPassword]
             );
         } else {
-            const dbRole = userRole === 'staff' ? 'inventory_staff' : userRole;
+            const dbRole = userRole;
             await db.query(
                 'INSERT INTO users (username, email, password_hash, role) VALUES (?, ?, ?, ?)',
                 [name, email, hashedPassword, dbRole]

@@ -5,7 +5,7 @@ import { requireAuth, requireRole } from '../middleware/auth.js';
 const router = express.Router();
 
 router.use(requireAuth);
-router.use(requireRole(['admin', 'inventory_staff', 'staff', 'pharmacist']));
+router.use(requireRole(['admin', 'staff', 'pharmacist']));
 
 router.get('/', getOrders);
 router.get('/:id', getOrderById);

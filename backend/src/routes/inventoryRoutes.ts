@@ -5,7 +5,7 @@ import { requireAuth, requireRole } from '../middleware/auth.js';
 const router = express.Router();
 
 router.use(requireAuth);
-// Allow both admin and pharmacist to access GET routes
+// Allow admin, and pharmacist to access GET routes
 router.use(requireRole(['admin', 'pharmacist']));
 
 router.get('/summary', getInventorySummary);

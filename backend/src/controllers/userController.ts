@@ -204,3 +204,106 @@ export const resetPassword = async (req: Request, res: Response): Promise<any> =
         res.status(500).json({ error: 'Failed to reset password' });
     }
 };
+
+export const getProfile = async (req: Request, res: Response): Promise<any> => {
+    try {
+        if (!req.user || !req.user.id) {
+            return res.status(401).json({ error: 'Unauthorized' });
+        }
+        
+        const [users] = await db.query<RowDataPacket[]>('SELECT id, username, email, phone, role, status, created_at FROM users WHERE id = ?', [req.user.id]);
+        
+        if (users.length === 0) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+        
+        res.json(users[0]);
+    } catch (error) {
+        console.error('Error fetching profile:', error);
+        res.status(500).json({ error: 'Failed to fetch profile' });
+    }
+};
+
+export const updateProfile = async (req: Request, res: Response): Promise<any> => {
+    try {
+        if (!req.user || !req.user.id) {
+            return res.status(401).json({ error: 'Unauthorized' });
+        }
+        
+        const { username, phone } = req.body;
+        
+        if (!username) {
+            return res.status(400).json({ error: 'Name is required' });
+        }
+
+        const [existing] = await db.query<RowDataPacket[]>('SELECT * FROM users WHERE id = ?', [req.user.id]);
+        if (existing.length === 0) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        await db.query(
+            'UPDATE users SET username = ?, phone = ? WHERE id = ?',
+            [username, phone || null, req.user.id]
+        );
+
+        logAudit({
+            userId: req.user.id,
+            action: 'UPDATE',
+            module: 'Profile',
+            entityType: 'users',
+            entityId: req.user.id,
+            description: `User updated their own profile`,
+            oldValue: { username: existing[0].username, phone: existing[0].phone },
+            newValue: { username, phone }
+        });
+
+        res.json({ message: 'Profile updated successfully' });
+    } catch (error) {
+        console.error('Error updating profile:', error);
+        res.status(500).json({ error: 'Failed to update profile' });
+    }
+};
+
+export const changePassword = async (req: Request, res: Response): Promise<any> => {
+    try {
+        if (!req.user || !req.user.id) {
+            return res.status(401).json({ error: 'Unauthorized' });
+        }
+        
+        const { currentPassword, newPassword } = req.body;
+
+        if (!currentPassword || !newPassword) {
+            return res.status(400).json({ error: 'Current password and new password are required' });
+        }
+
+        const [users] = await db.query<RowDataPacket[]>('SELECT * FROM users WHERE id = ?', [req.user.id]);
+        if (users.length === 0) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        const user = users[0];
+        
+        const validPassword = await bcrypt.compare(currentPassword, user.password_hash);
+        if (!validPassword) {
+            return res.status(401).json({ error: 'Current password is incorrect' });
+        }
+
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        
+        await db.query('UPDATE users SET password_hash = ? WHERE id = ?', [hashedPassword, req.user.id]);
+
+        logAudit({
+            userId: req.user.id,
+            action: 'PASSWORD_CHANGE',
+            module: 'Profile',
+            entityType: 'users',
+            entityId: req.user.id,
+            description: `User changed their password`
+        });
+
+        res.json({ message: 'Password changed successfully' });
+    } catch (error) {
+        console.error('Error changing password:', error);
+        res.status(500).json({ error: 'Failed to change password' });
+    }
+};

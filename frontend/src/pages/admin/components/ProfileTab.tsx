@@ -111,26 +111,26 @@ const ProfileTab: React.FC = () => {
     };
 
     if (loading) {
-        return <div className="p-10 text-center text-[#a09eb5]">Loading profile...</div>;
+        return <div className="p-10 text-center text-muted">Loading profile...</div>;
     }
 
     return (
         <div className="max-w-4xl mx-auto space-y-8">
             <div>
-                <h1 className="text-3xl font-bold text-white mb-2">My Profile</h1>
-                <p className="text-[#a09eb5]">Manage your account details and security settings.</p>
+                <h1 className="text-3xl font-bold text-main mb-2">My Profile</h1>
+                <p className="text-muted">Manage your account details and security settings.</p>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 {/* Profile Details Form */}
-                <div className="lg:col-span-2 bg-[#232136] rounded-2xl border border-white/5 p-8 shadow-xl">
+                <div className="lg:col-span-2 bg-surface rounded-2xl border border-subtle p-8 shadow-xl">
                     <div className="flex items-center space-x-4 mb-8">
                         <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#9b51e0] to-[#7a39b7] flex items-center justify-center text-white text-2xl font-bold shadow-lg shadow-[#9b51e0]/20">
                             {formData.username ? formData.username.charAt(0).toUpperCase() : 'A'}
                         </div>
                         <div>
-                            <h2 className="text-xl font-bold text-white">{formData.username}</h2>
-                            <p className="text-[#a09eb5] capitalize">{formData.role.replace('_', ' ')}</p>
+                            <h2 className="text-xl font-bold text-main">{formData.username}</h2>
+                            <p className="text-muted capitalize">{formData.role.replace('_', ' ')}</p>
                         </div>
                     </div>
 
@@ -151,7 +151,7 @@ const ProfileTab: React.FC = () => {
                     <form onSubmit={handleProfileUpdate} className="space-y-6">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
-                                <label className="block text-sm font-medium text-[#a09eb5] mb-2">Full Name / Username</label>
+                                <label className="block text-sm font-medium text-muted mb-2">Full Name / Username</label>
                                 <div className="relative">
                                     <User className="absolute left-4 top-1/2 -translate-y-1/2 text-[#787596] w-5 h-5" />
                                     <input 
@@ -159,13 +159,13 @@ const ProfileTab: React.FC = () => {
                                         required
                                         value={formData.username} 
                                         onChange={e => setFormData({...formData, username: e.target.value})}
-                                        className="w-full pl-12 pr-4 py-3 bg-[#110f22] border border-white/5 text-white rounded-xl focus:outline-none focus:border-[#9b51e0] transition-colors"
+                                        className="w-full pl-12 pr-4 py-3 bg-base border border-subtle text-main rounded-xl focus:outline-none focus:border-[#9b51e0] transition-colors"
                                     />
                                 </div>
                             </div>
                             
                             <div>
-                                <label className="block text-sm font-medium text-[#a09eb5] mb-2">Email Address</label>
+                                <label className="block text-sm font-medium text-muted mb-2">Email Address</label>
                                 <div className="relative">
                                     <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-[#787596] w-5 h-5" />
                                     <input 
@@ -173,13 +173,13 @@ const ProfileTab: React.FC = () => {
                                         required
                                         value={formData.email} 
                                         onChange={e => setFormData({...formData, email: e.target.value})}
-                                        className="w-full pl-12 pr-4 py-3 bg-[#110f22] border border-white/5 text-white rounded-xl focus:outline-none focus:border-[#9b51e0] transition-colors"
+                                        className="w-full pl-12 pr-4 py-3 bg-base border border-subtle text-main rounded-xl focus:outline-none focus:border-[#9b51e0] transition-colors"
                                     />
                                 </div>
                             </div>
                             
                             <div>
-                                <label className="block text-sm font-medium text-[#a09eb5] mb-2">Phone Number</label>
+                                <label className="block text-sm font-medium text-muted mb-2">Phone Number</label>
                                 <div className="relative">
                                     <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-[#787596] w-5 h-5" />
                                     <input 
@@ -187,7 +187,7 @@ const ProfileTab: React.FC = () => {
                                         value={formData.phone} 
                                         onChange={e => setFormData({...formData, phone: e.target.value})}
                                         placeholder="Optional"
-                                        className="w-full pl-12 pr-4 py-3 bg-[#110f22] border border-white/5 text-white rounded-xl focus:outline-none focus:border-[#9b51e0] transition-colors"
+                                        className="w-full pl-12 pr-4 py-3 bg-base border border-subtle text-main rounded-xl focus:outline-none focus:border-[#9b51e0] transition-colors"
                                     />
                                 </div>
                             </div>
@@ -207,10 +207,10 @@ const ProfileTab: React.FC = () => {
                 </div>
 
                 {/* Password Change Form */}
-                <div className="bg-[#232136] rounded-2xl border border-white/5 p-8 shadow-xl h-fit">
-                    <div className="flex items-center space-x-3 mb-6 border-b border-white/5 pb-4">
+                <div className="bg-surface rounded-2xl border border-subtle p-8 shadow-xl h-fit">
+                    <div className="flex items-center space-x-3 mb-6 border-b border-subtle pb-4">
                         <ShieldAlert className="w-6 h-6 text-amber-400" />
-                        <h2 className="text-xl font-bold text-white">Security</h2>
+                        <h2 className="text-xl font-bold text-main">Security</h2>
                     </div>
 
                     {passwordError && (
@@ -227,7 +227,7 @@ const ProfileTab: React.FC = () => {
 
                     <form onSubmit={handlePasswordUpdate} className="space-y-5">
                         <div>
-                            <label className="block text-sm font-medium text-[#a09eb5] mb-2">New Password</label>
+                            <label className="block text-sm font-medium text-muted mb-2">New Password</label>
                             <div className="relative">
                                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-[#787596] w-5 h-5" />
                                 <input 
@@ -236,13 +236,13 @@ const ProfileTab: React.FC = () => {
                                     value={passwordData.newPassword} 
                                     onChange={e => setPasswordData({...passwordData, newPassword: e.target.value})}
                                     placeholder="••••••••"
-                                    className="w-full pl-12 pr-4 py-3 bg-[#110f22] border border-white/5 text-white rounded-xl focus:outline-none focus:border-amber-500 transition-colors"
+                                    className="w-full pl-12 pr-4 py-3 bg-base border border-subtle text-main rounded-xl focus:outline-none focus:border-amber-500 transition-colors"
                                 />
                             </div>
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-[#a09eb5] mb-2">Confirm New Password</label>
+                            <label className="block text-sm font-medium text-muted mb-2">Confirm New Password</label>
                             <div className="relative">
                                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-[#787596] w-5 h-5" />
                                 <input 
@@ -251,7 +251,7 @@ const ProfileTab: React.FC = () => {
                                     value={passwordData.confirmPassword} 
                                     onChange={e => setPasswordData({...passwordData, confirmPassword: e.target.value})}
                                     placeholder="••••••••"
-                                    className="w-full pl-12 pr-4 py-3 bg-[#110f22] border border-white/5 text-white rounded-xl focus:outline-none focus:border-amber-500 transition-colors"
+                                    className="w-full pl-12 pr-4 py-3 bg-base border border-subtle text-main rounded-xl focus:outline-none focus:border-amber-500 transition-colors"
                                 />
                             </div>
                         </div>

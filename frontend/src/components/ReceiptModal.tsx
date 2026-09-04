@@ -16,23 +16,23 @@ export default function ReceiptModal({ isOpen, onClose, saleData, pharmacyInfo }
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 print:bg-white print:p-0">
-      <div className="bg-[#1a1825] print:bg-white w-full max-w-md rounded-2xl shadow-xl overflow-hidden print:shadow-none print:w-[80mm] print:rounded-none">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 print:static print:block print:bg-white print:p-0">
+      <div className="bg-[#1a1825] print:bg-white w-full max-w-md max-h-[90vh] flex flex-col rounded-2xl shadow-xl overflow-hidden print:overflow-visible print:shadow-none print:w-[80mm] print:mx-auto print:rounded-none">
         {/* Header - Hidden on print */}
-        <div className="p-4 border-b border-white/5 flex justify-between items-center bg-[#232136] print:hidden">
+        <div className="p-4 border-b border-subtle flex justify-between items-center bg-surface shrink-0 print:hidden">
           <div className="flex items-center space-x-2 text-[#10b981]">
             <CheckCircle className="w-5 h-5" />
-            <h2 className="font-semibold text-white">Sale Completed</h2>
+            <h2 className="font-semibold text-main">Sale Completed</h2>
           </div>
-          <button onClick={onClose} className="p-2 hover:bg-white/5 rounded-lg text-[#a09eb5] transition-colors">
+          <button onClick={onClose} className="p-2 hover:bg-hover rounded-lg text-muted transition-colors">
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Receipt Content */}
-        <div className="p-6 text-sm text-[#a09eb5] print:text-black print:p-4" id="receipt-content">
+        <div className="p-6 text-sm text-muted overflow-y-auto custom-scrollbar print:overflow-visible print:text-black print:p-4" id="receipt-content">
           <div className="text-center mb-6">
-            <h1 className="text-xl font-bold text-white print:text-black mb-1">
+            <h1 className="text-xl font-bold text-main print:text-black mb-1">
               {pharmacyInfo?.name || 'Pharma POS'}
             </h1>
             <p className="text-xs">
@@ -47,30 +47,30 @@ export default function ReceiptModal({ isOpen, onClose, saleData, pharmacyInfo }
 
           <div className="flex justify-between mb-1">
             <span>Sale No:</span>
-            <span className="text-white print:text-black font-medium">{saleData.sell_no || saleData.saleId || 'N/A'}</span>
+            <span className="text-main print:text-black font-medium">{saleData.sell_no || saleData.saleId || 'N/A'}</span>
           </div>
           <div className="flex justify-between mb-1">
             <span>Date:</span>
-            <span className="text-white print:text-black">{new Date().toLocaleString()}</span>
+            <span className="text-main print:text-black">{new Date().toLocaleString()}</span>
           </div>
           <div className="flex justify-between mb-1">
             <span>Pharmacist:</span>
-            <span className="text-white print:text-black">{saleData.pharmacist_name || 'Pharmacist'}</span>
+            <span className="text-main print:text-black">{saleData.pharmacist_name || 'Pharmacist'}</span>
           </div>
           {saleData.customer_name && (
             <div className="flex justify-between mb-1">
               <span>Customer:</span>
-              <span className="text-white print:text-black">{saleData.customer_name}</span>
+              <span className="text-main print:text-black">{saleData.customer_name}</span>
             </div>
           )}
 
           <div className="border-t border-dashed border-white/20 print:border-black/20 my-4"></div>
 
-          <div className="mb-2 font-semibold text-white print:text-black">Items</div>
+          <div className="mb-2 font-semibold text-main print:text-black">Items</div>
           <div className="space-y-3">
             {saleData.items?.map((item: any, idx: number) => (
               <div key={idx}>
-                <div className="flex justify-between text-white print:text-black">
+                <div className="flex justify-between text-main print:text-black">
                   <span>{item.name || item.drug_name}</span>
                   <span>${(item.unit_price * item.quantity).toFixed(2)}</span>
                 </div>
@@ -86,7 +86,7 @@ export default function ReceiptModal({ isOpen, onClose, saleData, pharmacyInfo }
 
           <div className="flex justify-between mb-1">
             <span>Subtotal:</span>
-            <span className="text-white print:text-black">${(saleData.subtotal || 0).toFixed(2)}</span>
+            <span className="text-main print:text-black">${(saleData.subtotal || 0).toFixed(2)}</span>
           </div>
           {saleData.discount > 0 && (
             <div className="flex justify-between mb-1 text-[#10b981] print:text-black">
@@ -95,25 +95,25 @@ export default function ReceiptModal({ isOpen, onClose, saleData, pharmacyInfo }
             </div>
           )}
           
-          <div className="border-t border-white/10 print:border-black/50 my-2"></div>
+          <div className="border-t border-subtle-hover print:border-black/50 my-2"></div>
           
-          <div className="flex justify-between text-lg font-bold text-white print:text-black mb-4">
+          <div className="flex justify-between text-lg font-bold text-main print:text-black mb-4">
             <span>Total:</span>
             <span>${(saleData.total_amount || 0).toFixed(2)}</span>
           </div>
 
           <div className="flex justify-between mb-1 text-xs">
             <span>Payment Method:</span>
-            <span className="text-white print:text-black uppercase">{saleData.payment_method || 'CASH'}</span>
+            <span className="text-main print:text-black uppercase">{saleData.payment_method || 'CASH'}</span>
           </div>
           <div className="flex justify-between mb-1 text-xs">
             <span>Amount Paid:</span>
-            <span className="text-white print:text-black">${(saleData.amount_paid || saleData.total_amount || 0).toFixed(2)}</span>
+            <span className="text-main print:text-black">${(saleData.amount_paid || saleData.total_amount || 0).toFixed(2)}</span>
           </div>
           {saleData.change > 0 && (
             <div className="flex justify-between mb-1 text-xs">
               <span>Change:</span>
-              <span className="text-white print:text-black">${saleData.change.toFixed(2)}</span>
+              <span className="text-main print:text-black">${saleData.change.toFixed(2)}</span>
             </div>
           )}
 
@@ -124,16 +124,16 @@ export default function ReceiptModal({ isOpen, onClose, saleData, pharmacyInfo }
         </div>
 
         {/* Footer actions - Hidden on print */}
-        <div className="p-4 border-t border-white/5 bg-[#232136] flex gap-3 print:hidden">
+        <div className="p-4 border-t border-subtle bg-surface flex gap-3 shrink-0 print:hidden">
           <button 
             onClick={onClose}
-            className="flex-1 py-2 px-4 rounded-xl font-medium bg-white/5 text-white hover:bg-white/10 transition-colors"
+            className="flex-1 py-2 px-4 rounded-xl font-medium bg-hover text-white hover:bg-white/10 transition-colors"
           >
             New Sale
           </button>
           <button 
             onClick={handlePrint}
-            className="flex-1 py-2 px-4 rounded-xl font-medium bg-[#10b981] text-white hover:bg-[#059669] transition-colors flex items-center justify-center gap-2"
+            className="flex-1 py-2 px-4 rounded-xl font-medium bg-[#10b981] text-main hover:bg-[#059669] transition-colors flex items-center justify-center gap-2"
           >
             <Printer className="w-4 h-4" />
             Print Receipt

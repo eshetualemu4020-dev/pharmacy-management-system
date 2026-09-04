@@ -51,45 +51,45 @@ const AuditLogsTab: React.FC = () => {
         if (a.includes('update') || a.includes('change') || a.includes('adjust')) return 'bg-blue-500/10 text-blue-400';
         if (a.includes('delete') || a.includes('remove') || a.includes('cancel')) return 'bg-red-500/10 text-red-400';
         if (a.includes('login') || a.includes('logout') || a.includes('auth')) return 'bg-purple-500/10 text-purple-400';
-        if (a.includes('view')) return 'bg-white/10 text-[#a09eb5]';
-        return 'bg-white/10 text-[#a09eb5]';
+        if (a.includes('view')) return 'bg-white/10 text-muted';
+        return 'bg-white/10 text-muted';
     };
 
     return (
         <div className="space-y-6">
             <div className="flex justify-between items-center mb-6">
                 <div>
-                    <h1 className="text-3xl font-bold text-white mb-2">Audit Logs</h1>
-                    <p className="text-[#a09eb5]">Monitor system activity, user actions, and security events.</p>
+                    <h1 className="text-3xl font-bold text-main mb-2">Audit Logs</h1>
+                    <p className="text-muted">Monitor system activity, user actions, and security events.</p>
                 </div>
                 <button
                     onClick={fetchLogs}
-                    className="flex items-center gap-2 px-5 py-2.5 bg-[#232136] text-[#a09eb5] hover:text-white border border-white/5 hover:bg-white/5 rounded-xl font-medium transition-colors"
+                    className="flex items-center gap-2 px-5 py-2.5 bg-surface text-muted hover:text-main border border-subtle hover:bg-hover rounded-xl font-medium transition-colors"
                 >
                     <RefreshCw size={18} />
                     Refresh
                 </button>
             </div>
 
-            <div className="bg-[#232136] p-6 rounded-2xl border border-white/5 space-y-4">
+            <div className="bg-surface p-6 rounded-2xl border border-subtle space-y-4">
                 <form onSubmit={handleSearch} className="flex flex-wrap gap-4">
                     <div className="flex-1 min-w-[200px] relative">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[#a09eb5]" size={20} />
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" size={20} />
                         <input
                             type="text"
                             placeholder="Search user, action, description..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full pl-10 pr-4 py-2 bg-[#110f22] border border-white/5 text-white rounded-xl focus:outline-none focus:border-[#9b51e0] transition-colors"
+                            className="w-full pl-10 pr-4 py-2 bg-base border border-subtle text-main rounded-xl focus:outline-none focus:border-[#9b51e0] transition-colors"
                         />
                     </div>
                     
                     <div className="relative">
-                        <Filter className="absolute left-3 top-1/2 -translate-y-1/2 text-[#a09eb5]" size={20} />
+                        <Filter className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" size={20} />
                         <select
                             value={moduleFilter}
                             onChange={(e) => setModuleFilter(e.target.value)}
-                            className="pl-10 pr-8 py-2 bg-[#110f22] border border-white/5 text-[#a09eb5] rounded-xl focus:outline-none focus:border-[#9b51e0] appearance-none transition-colors"
+                            className="pl-10 pr-8 py-2 bg-base border border-subtle text-muted rounded-xl focus:outline-none focus:border-[#9b51e0] appearance-none transition-colors"
                         >
                             <option value="">All Modules</option>
                             {modules.map(m => (
@@ -100,25 +100,25 @@ const AuditLogsTab: React.FC = () => {
 
                     <div className="flex items-center gap-2">
                         <div className="relative">
-                            <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 text-[#a09eb5]" size={20} />
+                            <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" size={20} />
                             <input
                                 type="date"
                                 value={dateFrom}
                                 max={dateTo || undefined}
                                 onChange={(e) => setDateFrom(e.target.value)}
-                                className="pl-10 pr-4 py-2 bg-[#110f22] border border-white/5 text-[#a09eb5] rounded-xl focus:outline-none focus:border-[#9b51e0] transition-colors style-color-scheme-dark"
+                                className="pl-10 pr-4 py-2 bg-base border border-subtle text-muted rounded-xl focus:outline-none focus:border-[#9b51e0] transition-colors style-color-scheme-dark"
                                 style={{ colorScheme: 'dark' }}
                             />
                         </div>
-                        <span className="text-[#a09eb5]">to</span>
+                        <span className="text-muted">to</span>
                         <div className="relative">
-                            <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 text-[#a09eb5]" size={20} />
+                            <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" size={20} />
                             <input
                                 type="date"
                                 value={dateTo}
                                 min={dateFrom || undefined}
                                 onChange={(e) => setDateTo(e.target.value)}
-                                className="pl-10 pr-4 py-2 bg-[#110f22] border border-white/5 text-[#a09eb5] rounded-xl focus:outline-none focus:border-[#9b51e0] transition-colors style-color-scheme-dark"
+                                className="pl-10 pr-4 py-2 bg-base border border-subtle text-muted rounded-xl focus:outline-none focus:border-[#9b51e0] transition-colors style-color-scheme-dark"
                                 style={{ colorScheme: 'dark' }}
                             />
                         </div>
@@ -133,39 +133,39 @@ const AuditLogsTab: React.FC = () => {
                 </form>
             </div>
 
-            <div className="bg-[#232136] rounded-2xl border border-white/5 overflow-hidden">
+            <div className="bg-surface rounded-2xl border border-subtle overflow-hidden">
                 {error ? (
                     <div className="p-10 text-center text-red-400 bg-red-500/5">{error}</div>
                 ) : loading ? (
-                    <div className="p-10 text-center text-[#a09eb5]">Loading audit logs...</div>
+                    <div className="p-10 text-center text-muted">Loading audit logs...</div>
                 ) : logs.length === 0 ? (
                     <div className="p-10 text-center flex flex-col items-center justify-center space-y-3">
-                        <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center text-[#a09eb5]">
+                        <div className="w-16 h-16 bg-hover rounded-full flex items-center justify-center text-muted">
                             <Activity size={24} />
                         </div>
-                        <div className="text-[#a09eb5]">No audit logs found.</div>
+                        <div className="text-muted">No audit logs found.</div>
                     </div>
                 ) : (
                     <div className="overflow-x-auto">
                         <table className="w-full text-left border-collapse">
                             <thead>
-                                <tr className="bg-white/5 border-b border-white/5">
-                                    <th className="px-6 py-4 text-xs font-bold text-[#a09eb5] uppercase tracking-wider">Date & Time</th>
-                                    <th className="px-6 py-4 text-xs font-bold text-[#a09eb5] uppercase tracking-wider">User</th>
-                                    <th className="px-6 py-4 text-xs font-bold text-[#a09eb5] uppercase tracking-wider">Module</th>
-                                    <th className="px-6 py-4 text-xs font-bold text-[#a09eb5] uppercase tracking-wider">Action</th>
-                                    <th className="px-6 py-4 text-xs font-bold text-[#a09eb5] uppercase tracking-wider">Description</th>
-                                    <th className="px-6 py-4 text-xs font-bold text-[#a09eb5] uppercase tracking-wider text-right">Actions</th>
+                                <tr className="bg-hover border-b border-subtle">
+                                    <th className="px-6 py-4 text-xs font-bold text-muted uppercase tracking-wider">Date & Time</th>
+                                    <th className="px-6 py-4 text-xs font-bold text-muted uppercase tracking-wider">User</th>
+                                    <th className="px-6 py-4 text-xs font-bold text-muted uppercase tracking-wider">Module</th>
+                                    <th className="px-6 py-4 text-xs font-bold text-muted uppercase tracking-wider">Action</th>
+                                    <th className="px-6 py-4 text-xs font-bold text-muted uppercase tracking-wider">Description</th>
+                                    <th className="px-6 py-4 text-xs font-bold text-muted uppercase tracking-wider text-right">Actions</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-white/5">
                                 {logs.map((log) => (
                                     <tr key={log.id} className="hover:bg-white/[0.02] transition-colors">
                                         <td className="px-6 py-4">
-                                            <div className="text-sm text-white font-medium">
+                                            <div className="text-sm text-main font-medium">
                                                 {new Date(log.created_at).toLocaleDateString()}
                                             </div>
-                                            <div className="text-xs text-[#a09eb5]">
+                                            <div className="text-xs text-muted">
                                                 {new Date(log.created_at).toLocaleTimeString()}
                                             </div>
                                         </td>
@@ -175,13 +175,13 @@ const AuditLogsTab: React.FC = () => {
                                                     {(log.username || 'S')[0].toUpperCase()}
                                                 </div>
                                                 <div>
-                                                    <div className="text-sm font-medium text-white">{log.username || 'System'}</div>
-                                                    <div className="text-xs text-[#a09eb5] capitalize">{(log.role || '').replace('_', ' ')}</div>
+                                                    <div className="text-sm font-medium text-main">{log.username || 'System'}</div>
+                                                    <div className="text-xs text-muted capitalize">{(log.role || '').replace('_', ' ')}</div>
                                                 </div>
                                             </div>
                                         </td>
                                         <td className="px-6 py-4">
-                                            <span className="px-2.5 py-1 text-xs font-medium bg-white/5 text-[#a09eb5] rounded-full border border-white/10">
+                                            <span className="px-2.5 py-1 text-xs font-medium bg-hover text-muted rounded-full border border-subtle-hover">
                                                 {log.module || 'System'}
                                             </span>
                                         </td>
@@ -191,20 +191,20 @@ const AuditLogsTab: React.FC = () => {
                                             </span>
                                         </td>
                                         <td className="px-6 py-4">
-                                            <div className="text-sm text-white max-w-md truncate">
+                                            <div className="text-sm text-main max-w-md truncate">
                                                 {log.description}
                                             </div>
                                             {log.target_table && (
-                                                <div className="text-xs text-[#a09eb5] mt-1 flex items-center space-x-1">
+                                                <div className="text-xs text-muted mt-1 flex items-center space-x-1">
                                                     <span>Target: {log.target_table}</span>
-                                                    {log.target_id && <span className="font-mono text-white/70">#{log.target_id}</span>}
+                                                    {log.target_id && <span className="font-mono text-main/70">#{log.target_id}</span>}
                                                 </div>
                                             )}
                                         </td>
                                         <td className="px-6 py-4 text-right">
                                             <button
                                                 onClick={() => setSelectedLog(log)}
-                                                className="p-2 text-[#a09eb5] hover:text-white hover:bg-white/10 rounded-lg transition-colors inline-flex"
+                                                className="p-2 text-muted hover:text-white hover:bg-white/10 rounded-lg transition-colors inline-flex"
                                                 title="View Details"
                                             >
                                                 <Eye size={18} />

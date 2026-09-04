@@ -93,26 +93,26 @@ export default function ReportsTab() {
       {/* Header & Global Filters */}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 print:hidden">
         <div>
-          <h1 className="text-3xl font-bold text-white mb-2">Pharmacy Reports</h1>
-          <p className="text-[#a09eb5]">Centralized view of pharmacy performance and operational data.</p>
+          <h1 className="text-3xl font-bold text-main mb-2">Pharmacy Reports</h1>
+          <p className="text-muted">Centralized view of pharmacy performance and operational data.</p>
         </div>
         <div className="flex items-center space-x-3">
-          <button onClick={handlePrint} className="px-4 py-2 bg-white/5 hover:bg-white/10 text-white rounded-xl flex items-center space-x-2 transition-colors border border-white/10">
+          <button onClick={handlePrint} className="px-4 py-2 bg-hover hover:bg-white/10 text-white rounded-xl flex items-center space-x-2 transition-colors border border-subtle-hover">
             <Printer className="w-4 h-4" />
             <span>Print / Export</span>
           </button>
         </div>
       </div>
 
-      <div className="bg-[#232136] rounded-2xl border border-white/5 p-4 shadow-xl print:hidden flex flex-wrap gap-4 items-center">
-        <div className="flex items-center space-x-2 text-[#a09eb5]">
+      <div className="bg-surface rounded-2xl border border-subtle p-4 shadow-xl print:hidden flex flex-wrap gap-4 items-center">
+        <div className="flex items-center space-x-2 text-muted">
           <Calendar className="w-5 h-5" />
           <span className="font-medium">Period:</span>
         </div>
         <select 
           value={dateFilter}
           onChange={(e) => setDateFilter(e.target.value)}
-          className="bg-[#110f22] border border-white/10 rounded-xl px-4 py-2 text-white focus:outline-none focus:border-[#9b51e0] appearance-none"
+          className="bg-base border border-subtle-hover rounded-xl px-4 py-2 text-main focus:outline-none focus:border-[#9b51e0] appearance-none"
         >
           <option value="today">Today</option>
           <option value="yesterday">Yesterday</option>
@@ -130,15 +130,15 @@ export default function ReportsTab() {
               value={customStart}
               max={customEnd || undefined}
               onChange={(e) => setCustomStart(e.target.value)}
-              className="bg-[#110f22] border border-white/10 rounded-xl px-4 py-2 text-white focus:outline-none focus:border-[#9b51e0]"
+              className="bg-base border border-subtle-hover rounded-xl px-4 py-2 text-main focus:outline-none focus:border-[#9b51e0]"
             />
-            <span className="text-[#a09eb5]">to</span>
+            <span className="text-muted">to</span>
             <input 
               type="date" 
               value={customEnd}
               min={customStart || undefined}
               onChange={(e) => setCustomEnd(e.target.value)}
-              className="bg-[#110f22] border border-white/10 rounded-xl px-4 py-2 text-white focus:outline-none focus:border-[#9b51e0]"
+              className="bg-base border border-subtle-hover rounded-xl px-4 py-2 text-main focus:outline-none focus:border-[#9b51e0]"
             />
           </div>
         )}
@@ -161,7 +161,7 @@ export default function ReportsTab() {
             className={`flex items-center space-x-2 px-5 py-3 rounded-xl font-bold whitespace-nowrap transition-colors ${
               activeTab === tab.id 
                 ? 'bg-[#9b51e0] text-white shadow-lg shadow-[#9b51e0]/20' 
-                : 'bg-white/5 text-[#a09eb5] hover:bg-white/10 hover:text-white'
+                : 'bg-hover text-muted hover:bg-white/10 hover:text-white'
             }`}
           >
             <tab.icon className="w-5 h-5" />

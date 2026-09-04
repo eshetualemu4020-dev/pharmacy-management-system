@@ -5,7 +5,7 @@ import { logAudit } from '../utils/auditLogger.js';
 
 export const getSales = async (req: Request, res: Response) => {
     try {
-        const { search, payment_status, sale_status, date_range, page = '1', limit = '10' } = req.query;
+        const { search, payment_status, sale_status, date_range, sort, page = '1', limit = '10' } = req.query;
         
         let query = `
             SELECT s.*, 
@@ -42,7 +42,15 @@ export const getSales = async (req: Request, res: Response) => {
             query += ` AND MONTH(s.created_at) = MONTH(CURDATE()) AND YEAR(s.created_at) = YEAR(CURDATE())`;
         }
 
-        query += ` ORDER BY s.created_at DESC`;
+        if (sort === 'oldest') {
+            query += ` ORDER BY s.created_at ASC`;
+        } else if (sort === 'highest_amount') {
+            query += ` ORDER BY s.total_amount DESC`;
+        } else if (sort === 'lowest_amount') {
+            query += ` ORDER BY s.total_amount ASC`;
+        } else {
+            query += ` ORDER BY s.created_at DESC`;
+        }
 
         const offset = (parseInt(page as string) - 1) * parseInt(limit as string);
         query += ` LIMIT ? OFFSET ?`;
@@ -122,9 +130,15 @@ export const getSaleById = async (req: Request, res: Response) => {
         const sale = (sales as any)[0];
 
         const [items] = await pool.query(`
-            SELECT si.*, d.name as drug_name
+            SELECT si.*, 
+                   d.name as drug_name, 
+                   d.generic_name,
+                   b.batch_number, 
+                   b.mfg_date, 
+                   b.exp_date
             FROM sale_items si
             LEFT JOIN drugs d ON si.drug_id = d.id
+            LEFT JOIN batches b ON si.batch_id = b.id
             WHERE si.sale_id = ?
         `, [saleId]);
 
@@ -249,7 +263,8 @@ export const createSale = async (req: Request, res: Response) => {
     try {
         await connection.beginTransaction();
 
-        const { customer_id, user_id, items, promotion_id, payment_method = 'cash' } = req.body;
+        const { customer_id, items, promotion_id, payment_method = 'cash' } = req.body;
+        const user_id = (req as any).user?.id || req.body.user_id;
 
         if (!items || items.length === 0) {
             await connection.rollback();
@@ -282,9 +297,16 @@ export const createSale = async (req: Request, res: Response) => {
             }
 
             if (batch_id) {
-                const [batchRows] = await connection.query('SELECT quantity FROM batches WHERE id = ? FOR UPDATE', [batch_id]);
+                const [batchRows] = await connection.query('SELECT quantity, exp_date FROM batches WHERE id = ? FOR UPDATE', [batch_id]);
                 if ((batchRows as any[]).length === 0 || (batchRows as any)[0].quantity < quantity) {
                     throw new Error(`Insufficient stock in batch ${batch_id} for drug ${drug.name}`);
+                }
+                
+                const batchExpDate = new Date((batchRows as any)[0].exp_date);
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                if (batchExpDate < today) {
+                    throw new Error(`Cannot sell: Batch ${batch_id} for drug ${drug.name} has expired.`);
                 }
             }
 

@@ -5,7 +5,12 @@ import { logAudit } from '../utils/auditLogger.js';
 
 export const getAllPromotions = async (req: Request, res: Response): Promise<any> => {
     try {
-        const { search, status, type } = req.query;
+        let { search, status, type } = req.query;
+        
+        if (req.user?.role === 'customer') {
+            status = 'active';
+        }
+
         let query = `
             SELECT p.*, u.username as created_by_name
             FROM promotions p
@@ -35,7 +40,7 @@ export const getAllPromotions = async (req: Request, res: Response): Promise<any
         const today = new Date();
         today.setHours(0, 0, 0, 0);
         
-        const rows = (promotions as any[]).map(p => {
+        let rows = (promotions as any[]).map(p => {
             let currentStatus = p.status;
             
             if (p.status !== 'draft' && p.status !== 'inactive') {
@@ -49,6 +54,10 @@ export const getAllPromotions = async (req: Request, res: Response): Promise<any
             
             return { ...p, current_status: currentStatus };
         });
+
+        if (req.user?.role === 'customer') {
+            rows = rows.filter(r => r.current_status === 'active');
+        }
 
         return res.json(rows);
     } catch (error: any) {
@@ -85,6 +94,11 @@ export const getPromotionById = async (req: Request, res: Response): Promise<any
             else if (today > endDate) currentStatus = 'expired';
             else currentStatus = 'active';
         }
+        
+        if (req.user?.role === 'customer' && currentStatus !== 'active') {
+            return res.status(403).json({ error: 'Promotion not accessible' });
+        }
+        
         promotion.current_status = currentStatus;
 
         // Fetch related drugs

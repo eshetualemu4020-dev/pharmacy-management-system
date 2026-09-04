@@ -71,31 +71,31 @@ export default function PrescriptionsTab() {
     <div className="flex-1 p-10 overflow-y-auto">
       <div className="flex justify-between items-center mb-10">
         <div>
-          <h1 className="text-3xl font-bold text-white mb-2">Prescription Management</h1>
-          <p className="text-[#a09eb5]">Oversight of customer prescriptions and pharmacist reviews.</p>
+          <h1 className="text-3xl font-bold text-main mb-2">Prescription Management</h1>
+          <p className="text-muted">Oversight of customer prescriptions and pharmacist reviews.</p>
         </div>
       </div>
 
       {/* Filters and Search */}
-      <div className="bg-[#232136] p-4 rounded-2xl border border-white/5 mb-6 flex flex-col md:flex-row gap-4 justify-between items-center">
+      <div className="bg-surface p-4 rounded-2xl border border-subtle mb-6 flex flex-col md:flex-row gap-4 justify-between items-center">
         <form onSubmit={handleSearch} className="relative w-full md:w-96">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[#a09eb5]" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted" />
           <input 
             type="text" 
             placeholder="Search by ID, name, email or order ID..." 
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full bg-[#110f22] border border-white/5 rounded-xl pl-10 pr-4 py-2.5 text-white focus:outline-none focus:border-[#9b51e0] transition-colors"
+            className="w-full bg-base border border-subtle rounded-xl pl-10 pr-4 py-2.5 text-main focus:outline-none focus:border-[#9b51e0] transition-colors"
           />
         </form>
         
         <div className="flex gap-4 w-full md:w-auto">
           <div className="relative">
-            <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#a09eb5]" />
+            <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted" />
             <select 
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="bg-[#110f22] border border-white/5 rounded-xl pl-9 pr-8 py-2.5 text-white focus:outline-none focus:border-[#9b51e0] transition-colors appearance-none"
+              className="bg-base border border-subtle rounded-xl pl-9 pr-8 py-2.5 text-main focus:outline-none focus:border-[#9b51e0] transition-colors appearance-none"
             >
               <option value="">All Statuses</option>
               <option value="pending">Pending</option>
@@ -114,24 +114,24 @@ export default function PrescriptionsTab() {
       )}
 
       {/* Data Table */}
-      <div className="bg-[#232136] rounded-2xl border border-white/5 overflow-hidden">
+      <div className="bg-surface rounded-2xl border border-subtle overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="border-b border-white/5">
-                <th className="px-6 py-4 text-left text-xs font-bold text-[#a09eb5] uppercase tracking-wider">Prescription ID</th>
-                <th className="px-6 py-4 text-left text-xs font-bold text-[#a09eb5] uppercase tracking-wider">Customer</th>
-                <th className="px-6 py-4 text-left text-xs font-bold text-[#a09eb5] uppercase tracking-wider">Order ID</th>
-                <th className="px-6 py-4 text-left text-xs font-bold text-[#a09eb5] uppercase tracking-wider">Date Submitted</th>
-                <th className="px-6 py-4 text-left text-xs font-bold text-[#a09eb5] uppercase tracking-wider">Status</th>
-                <th className="px-6 py-4 text-left text-xs font-bold text-[#a09eb5] uppercase tracking-wider">Reviewed By</th>
-                <th className="px-6 py-4 text-left text-xs font-bold text-[#a09eb5] uppercase tracking-wider">Actions</th>
+              <tr className="border-b border-subtle">
+                <th className="px-6 py-4 text-left text-xs font-bold text-muted uppercase tracking-wider">Prescription ID</th>
+                <th className="px-6 py-4 text-left text-xs font-bold text-muted uppercase tracking-wider">Customer</th>
+                <th className="px-6 py-4 text-left text-xs font-bold text-muted uppercase tracking-wider">Order ID</th>
+                <th className="px-6 py-4 text-left text-xs font-bold text-muted uppercase tracking-wider">Date Submitted</th>
+                <th className="px-6 py-4 text-left text-xs font-bold text-muted uppercase tracking-wider">Status</th>
+                <th className="px-6 py-4 text-left text-xs font-bold text-muted uppercase tracking-wider">Reviewed By</th>
+                <th className="px-6 py-4 text-left text-xs font-bold text-muted uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/5">
               {loading ? (
                 <tr>
-                  <td colSpan={7} className="px-6 py-8 text-center text-[#a09eb5]">
+                  <td colSpan={7} className="px-6 py-8 text-center text-muted">
                     <div className="flex items-center justify-center">
                       <div className="w-6 h-6 border-2 border-[#9b51e0] border-t-transparent rounded-full animate-spin mr-3"></div>
                       Loading prescriptions...
@@ -141,41 +141,41 @@ export default function PrescriptionsTab() {
               ) : prescriptions.length === 0 ? (
                 <tr>
                   <td colSpan={7} className="px-6 py-12 text-center">
-                    <FileText className="w-12 h-12 text-[#a09eb5] mx-auto mb-4 opacity-50" />
-                    <p className="text-white font-medium mb-1">No Prescriptions Found</p>
-                    <p className="text-[#a09eb5] text-sm">There are no prescriptions matching your criteria.</p>
+                    <FileText className="w-12 h-12 text-muted mx-auto mb-4 opacity-50" />
+                    <p className="text-main font-medium mb-1">No Prescriptions Found</p>
+                    <p className="text-muted text-sm">There are no prescriptions matching your criteria.</p>
                   </td>
                 </tr>
               ) : (
                 prescriptions.map((p) => (
                   <tr key={p.id} className="hover:bg-white/[0.02] transition-colors">
                     <td className="px-6 py-4">
-                      <span className="text-white font-medium">#{p.id}</span>
+                      <span className="text-main font-medium">#{p.id}</span>
                     </td>
                     <td className="px-6 py-4">
-                      <div className="text-white font-medium">{p.customer_name}</div>
-                      <div className="text-[#a09eb5] text-xs">{p.customer_email}</div>
+                      <div className="text-main font-medium">{p.customer_name}</div>
+                      <div className="text-muted text-xs">{p.customer_email}</div>
                     </td>
                     <td className="px-6 py-4">
-                      <span className="text-[#a09eb5]">#{p.order_id}</span>
+                      <span className="text-muted">#{p.order_id}</span>
                     </td>
                     <td className="px-6 py-4">
-                      <span className="text-[#a09eb5]">{new Date(p.created_at).toLocaleString()}</span>
+                      <span className="text-muted">{new Date(p.created_at).toLocaleString()}</span>
                     </td>
                     <td className="px-6 py-4">
                       {getStatusBadge(p.status)}
                     </td>
                     <td className="px-6 py-4">
                       {p.pharmacist_name ? (
-                        <span className="text-white">{p.pharmacist_name}</span>
+                        <span className="text-main">{p.pharmacist_name}</span>
                       ) : (
-                        <span className="text-[#a09eb5] italic">Unreviewed</span>
+                        <span className="text-muted italic">Unreviewed</span>
                       )}
                     </td>
                     <td className="px-6 py-4">
                       <button
                         onClick={() => handleOpenDetails(p.id)}
-                        className="p-2 text-[#a09eb5] hover:text-[#9b51e0] hover:bg-[#9b51e0]/10 rounded-lg transition-colors"
+                        className="p-2 text-muted hover:text-[#9b51e0] hover:bg-[#9b51e0]/10 rounded-lg transition-colors"
                         title="View Details"
                       >
                         <Eye className="w-5 h-5" />

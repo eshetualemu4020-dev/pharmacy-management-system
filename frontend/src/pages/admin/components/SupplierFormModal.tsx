@@ -186,20 +186,20 @@ export default function SupplierFormModal({ supplier, onClose, onSuccess }: Supp
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto">
-      <div className="bg-[#232136] rounded-2xl w-full max-w-3xl border border-white/10 shadow-2xl my-auto animate-fade-in flex flex-col max-h-[90vh]">
+      <div className="bg-surface rounded-2xl w-full max-w-3xl border border-subtle-hover shadow-2xl my-auto animate-fade-in flex flex-col max-h-[90vh]">
         
         {/* Header */}
-        <div className="flex justify-between items-center p-6 border-b border-white/5 bg-[#110f22]/50 rounded-t-2xl shrink-0">
+        <div className="flex justify-between items-center p-6 border-b border-subtle bg-base/50 rounded-t-2xl shrink-0">
           <div className="flex items-center space-x-3">
             <div className="w-10 h-10 rounded-xl bg-[#9b51e0]/10 flex items-center justify-center text-[#9b51e0]">
               <Building2 className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-xl font-bold text-white">{isEdit ? 'Edit Supplier' : 'Add New Supplier'}</h3>
-              <p className="text-[#a09eb5] text-sm">{isEdit ? `Update details for ${supplier.name}` : 'Register a new supplier to the system'}</p>
+              <h3 className="text-xl font-bold text-main">{isEdit ? 'Edit Supplier' : 'Add New Supplier'}</h3>
+              <p className="text-muted text-sm">{isEdit ? `Update details for ${supplier.name}` : 'Register a new supplier to the system'}</p>
             </div>
           </div>
-          <button onClick={onClose} className="p-2 text-[#a09eb5] hover:text-white hover:bg-white/10 rounded-full transition-colors" disabled={submitting}>
+          <button onClick={onClose} className="p-2 text-muted hover:text-white hover:bg-white/10 rounded-full transition-colors" disabled={submitting}>
             <X className="w-6 h-6" />
           </button>
         </div>
@@ -218,13 +218,13 @@ export default function SupplierFormModal({ supplier, onClose, onSuccess }: Supp
               
               {/* Company Name (Full Width) */}
               <div className="col-span-1 md:col-span-2">
-                <label className="block text-sm font-bold text-[#a09eb5] mb-1">Company Name <span className="text-red-400">*</span></label>
+                <label className="block text-sm font-bold text-muted mb-1">Company Name <span className="text-red-400">*</span></label>
                 <input 
                   type="text" 
                   value={formData.name} 
                   onChange={e => handleChange('name', e.target.value)} 
                   disabled={submitting}
-                  className={`w-full bg-[#110f22] border ${errors.name ? 'border-red-500' : 'border-white/5'} rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-[#9b51e0] transition-colors`}
+                  className={`w-full bg-base border ${errors.name ? 'border-red-500' : 'border-subtle'} rounded-xl px-4 py-2.5 text-main focus:outline-none focus:border-[#9b51e0] transition-colors`}
                   placeholder="Enter official company name"
                 />
                 {errors.name && <p className="text-red-400 text-xs mt-1">{errors.name}</p>}
@@ -232,13 +232,13 @@ export default function SupplierFormModal({ supplier, onClose, onSuccess }: Supp
               
               {/* Contact Person */}
               <div>
-                <label className="block text-sm font-bold text-[#a09eb5] mb-1">Contact Person</label>
+                <label className="block text-sm font-bold text-muted mb-1">Contact Person</label>
                 <input 
                   type="text" 
                   value={formData.contact_person} 
                   onChange={e => handleChange('contact_person', e.target.value)} 
                   disabled={submitting}
-                  className={`w-full bg-[#110f22] border ${errors.contact_person ? 'border-red-500' : 'border-white/5'} rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-[#9b51e0] transition-colors`}
+                  className={`w-full bg-base border ${errors.contact_person ? 'border-red-500' : 'border-subtle'} rounded-xl px-4 py-2.5 text-main focus:outline-none focus:border-[#9b51e0] transition-colors`}
                   placeholder="Full name of representative"
                 />
                 {errors.contact_person && <p className="text-red-400 text-xs mt-1">{errors.contact_person}</p>}
@@ -246,20 +246,20 @@ export default function SupplierFormModal({ supplier, onClose, onSuccess }: Supp
               
               {/* Phone Number */}
               <div className="relative">
-                <label className="block text-sm font-bold text-[#a09eb5] mb-1">Phone Number <span className="text-red-400">*</span></label>
+                <label className="block text-sm font-bold text-muted mb-1">Phone Number <span className="text-red-400">*</span></label>
                 <input 
                   type="tel" 
                   value={formData.phone} 
                   onChange={e => handleChange('phone', e.target.value)} 
                   disabled={submitting}
-                  className={`w-full bg-[#110f22] border ${errors.phone ? 'border-red-500' : 'border-white/5'} rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-[#9b51e0] transition-colors`}
+                  className={`w-full bg-base border ${errors.phone ? 'border-red-500' : 'border-subtle'} rounded-xl px-4 py-2.5 text-main focus:outline-none focus:border-[#9b51e0] transition-colors`}
                   placeholder="+1 (555) 000-0000"
                 />
                 {errors.phone && <p className="text-red-400 text-xs mt-1">{errors.phone}</p>}
                 
                 {phoneSuggestions.length > 0 && (
-                  <div className="absolute z-10 w-full mt-2 bg-[#232136] border border-white/10 rounded-xl shadow-xl max-h-48 overflow-y-auto">
-                    <div className="p-2 text-xs font-bold text-[#a09eb5] border-b border-white/5 sticky top-0 bg-[#232136]">Suggested Countries</div>
+                  <div className="absolute z-10 w-full mt-2 bg-surface border border-subtle-hover rounded-xl shadow-xl max-h-48 overflow-y-auto">
+                    <div className="p-2 text-xs font-bold text-muted border-b border-subtle sticky top-0 bg-surface">Suggested Countries</div>
                     {phoneSuggestions.map((sug, idx) => (
                       <button
                         key={idx}
@@ -268,10 +268,10 @@ export default function SupplierFormModal({ supplier, onClose, onSuccess }: Supp
                           setFormData(prev => ({ ...prev, country: sug.country }));
                           setPhoneSuggestions([]);
                         }}
-                        className="w-full text-left px-4 py-2 text-sm text-white hover:bg-[#9b51e0]/20 transition-colors flex justify-between items-center border-b border-white/5 last:border-0"
+                        className="w-full text-left px-4 py-2 text-sm text-white hover:bg-[#9b51e0]/20 transition-colors flex justify-between items-center border-b border-subtle last:border-0"
                       >
                         <span>{sug.country}</span>
-                        <span className="text-[#a09eb5] font-mono text-xs">{sug.code}</span>
+                        <span className="text-muted font-mono text-xs">{sug.code}</span>
                       </button>
                     ))}
                   </div>
@@ -280,13 +280,13 @@ export default function SupplierFormModal({ supplier, onClose, onSuccess }: Supp
               
               {/* Email Address */}
               <div>
-                <label className="block text-sm font-bold text-[#a09eb5] mb-1">Email Address</label>
+                <label className="block text-sm font-bold text-muted mb-1">Email Address</label>
                 <input 
                   type="email" 
                   value={formData.email} 
                   onChange={e => handleChange('email', e.target.value)} 
                   disabled={submitting}
-                  className={`w-full bg-[#110f22] border ${errors.email ? 'border-red-500' : 'border-white/5'} rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-[#9b51e0] transition-colors`}
+                  className={`w-full bg-base border ${errors.email ? 'border-red-500' : 'border-subtle'} rounded-xl px-4 py-2.5 text-main focus:outline-none focus:border-[#9b51e0] transition-colors`}
                   placeholder="contact@company.com"
                 />
                 {errors.email && <p className="text-red-400 text-xs mt-1">{errors.email}</p>}
@@ -294,12 +294,12 @@ export default function SupplierFormModal({ supplier, onClose, onSuccess }: Supp
               
               {/* Status */}
               <div>
-                <label className="block text-sm font-bold text-[#a09eb5] mb-1">Status <span className="text-red-400">*</span></label>
+                <label className="block text-sm font-bold text-muted mb-1">Status <span className="text-red-400">*</span></label>
                 <select 
                   value={formData.status} 
                   onChange={e => handleChange('status', e.target.value)} 
                   disabled={submitting}
-                  className={`w-full bg-[#110f22] border ${errors.status ? 'border-red-500' : 'border-white/5'} rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-[#9b51e0] appearance-none transition-colors`}
+                  className={`w-full bg-base border ${errors.status ? 'border-red-500' : 'border-subtle'} rounded-xl px-4 py-2.5 text-main focus:outline-none focus:border-[#9b51e0] appearance-none transition-colors`}
                 >
                   <option value="active">Active</option>
                   <option value="inactive">Inactive</option>
@@ -309,13 +309,13 @@ export default function SupplierFormModal({ supplier, onClose, onSuccess }: Supp
 
               {/* Street Address (Full Width) */}
               <div className="col-span-1 md:col-span-2">
-                <label className="block text-sm font-bold text-[#a09eb5] mb-1">Street Address</label>
+                <label className="block text-sm font-bold text-muted mb-1">Street Address</label>
                 <input 
                   type="text" 
                   value={formData.address} 
                   onChange={e => handleChange('address', e.target.value)} 
                   disabled={submitting}
-                  className={`w-full bg-[#110f22] border ${errors.address ? 'border-red-500' : 'border-white/5'} rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-[#9b51e0] transition-colors`}
+                  className={`w-full bg-base border ${errors.address ? 'border-red-500' : 'border-subtle'} rounded-xl px-4 py-2.5 text-main focus:outline-none focus:border-[#9b51e0] transition-colors`}
                   placeholder="123 Corporate Blvd, Suite 100"
                 />
                 {errors.address && <p className="text-red-400 text-xs mt-1">{errors.address}</p>}
@@ -323,13 +323,13 @@ export default function SupplierFormModal({ supplier, onClose, onSuccess }: Supp
 
               {/* City */}
               <div>
-                <label className="block text-sm font-bold text-[#a09eb5] mb-1">City</label>
+                <label className="block text-sm font-bold text-muted mb-1">City</label>
                 <input 
                   type="text" 
                   value={formData.city} 
                   onChange={e => handleChange('city', e.target.value)} 
                   disabled={submitting}
-                  className={`w-full bg-[#110f22] border ${errors.city ? 'border-red-500' : 'border-white/5'} rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-[#9b51e0] transition-colors`}
+                  className={`w-full bg-base border ${errors.city ? 'border-red-500' : 'border-subtle'} rounded-xl px-4 py-2.5 text-main focus:outline-none focus:border-[#9b51e0] transition-colors`}
                   placeholder="City Name"
                 />
                 {errors.city && <p className="text-red-400 text-xs mt-1">{errors.city}</p>}
@@ -337,12 +337,12 @@ export default function SupplierFormModal({ supplier, onClose, onSuccess }: Supp
 
               {/* Country */}
               <div>
-                <label className="block text-sm font-bold text-[#a09eb5] mb-1">Country</label>
+                <label className="block text-sm font-bold text-muted mb-1">Country</label>
                 <select 
                   value={formData.country} 
                   onChange={e => handleChange('country', e.target.value)} 
                   disabled={submitting}
-                  className="w-full bg-[#110f22] border border-white/5 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-[#9b51e0] appearance-none transition-colors"
+                  className="w-full bg-base border border-subtle rounded-xl px-4 py-2.5 text-main focus:outline-none focus:border-[#9b51e0] appearance-none transition-colors"
                 >
                   <option value="">Select a country...</option>
                   {COUNTRIES.map(c => (
@@ -354,8 +354,8 @@ export default function SupplierFormModal({ supplier, onClose, onSuccess }: Supp
               {/* Notes (Full Width) */}
               <div className="col-span-1 md:col-span-2">
                 <div className="flex justify-between items-end mb-1">
-                  <label className="block text-sm font-bold text-[#a09eb5]">Notes</label>
-                  <span className={`text-xs ${formData.notes.length > 500 ? 'text-red-400 font-bold' : 'text-[#a09eb5]'}`}>
+                  <label className="block text-sm font-bold text-muted">Notes</label>
+                  <span className={`text-xs ${formData.notes.length > 500 ? 'text-red-400 font-bold' : 'text-muted'}`}>
                     {formData.notes.length} / 500
                   </span>
                 </div>
@@ -364,7 +364,7 @@ export default function SupplierFormModal({ supplier, onClose, onSuccess }: Supp
                   value={formData.notes} 
                   onChange={e => handleChange('notes', e.target.value)} 
                   disabled={submitting}
-                  className={`w-full bg-[#110f22] border ${errors.notes ? 'border-red-500' : 'border-white/5'} rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#9b51e0] transition-colors resize-none`}
+                  className={`w-full bg-base border ${errors.notes ? 'border-red-500' : 'border-subtle'} rounded-xl px-4 py-3 text-main focus:outline-none focus:border-[#9b51e0] transition-colors resize-none`}
                   placeholder="Internal notes about this supplier, terms of service, shipping preferences, etc."
                 />
                 {errors.notes && <p className="text-red-400 text-xs mt-1">{errors.notes}</p>}
@@ -374,12 +374,12 @@ export default function SupplierFormModal({ supplier, onClose, onSuccess }: Supp
         </div>
         
         {/* Footer */}
-        <div className="flex justify-end items-center space-x-3 p-6 border-t border-white/5 shrink-0 bg-[#110f22]/50 rounded-b-2xl">
+        <div className="flex justify-end items-center space-x-3 p-6 border-t border-subtle shrink-0 bg-base/50 rounded-b-2xl">
           <button 
             type="button" 
             onClick={onClose} 
             disabled={submitting}
-            className="px-5 py-2.5 text-[#a09eb5] hover:text-white hover:bg-white/5 rounded-xl transition-colors disabled:opacity-50"
+            className="px-5 py-2.5 text-muted hover:text-main hover:bg-hover rounded-xl transition-colors disabled:opacity-50"
           >
             Cancel
           </button>

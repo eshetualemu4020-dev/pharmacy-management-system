@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import pool from '../config/db.js';
 import { logAudit } from '../utils/auditLogger.js';
+import { createNotification } from './notificationController.js';
 
 export const getOrders = async (req: Request, res: Response): Promise<any> => {
     try {
@@ -171,7 +172,7 @@ export const updateOrderStatus = async (req: Request, res: Response): Promise<an
 
         await connection.beginTransaction();
 
-        const [orders] = await connection.query(`SELECT status, payment_status FROM orders WHERE id = ? FOR UPDATE`, [orderId]);
+        const [orders] = await connection.query(`SELECT status, payment_status, customer_id FROM orders WHERE id = ? FOR UPDATE`, [orderId]);
         if ((orders as any[]).length === 0) {
             await connection.rollback();
             return res.status(404).json({ error: 'Order not found' });
@@ -213,7 +214,8 @@ export const updateOrderStatus = async (req: Request, res: Response): Promise<an
             // Check prescription and stock on CONFIRMATION
             if (status === 'confirmed') {
                 const [items] = await connection.query(`
-                    SELECT oi.id, oi.quantity, d.name, d.qty, d.is_active, d.exp_date, d.requires_prescription 
+                    SELECT oi.id, oi.quantity, d.name, d.stock, d.is_active, d.requires_prescription,
+                           COALESCE((SELECT SUM(quantity) FROM batches b WHERE b.drug_id = d.id AND b.exp_date > CURDATE()), 0) AS unexpired_qty
                     FROM order_items oi 
                     JOIN drugs d ON oi.drug_id = d.id 
                     WHERE oi.order_id = ?
@@ -226,13 +228,9 @@ export const updateOrderStatus = async (req: Request, res: Response): Promise<an
                         await connection.rollback();
                         return res.status(400).json({ error: `Cannot confirm: Product ${item.name} is inactive.` });
                     }
-                    if (new Date(item.exp_date) < new Date()) {
+                    if (item.unexpired_qty < item.quantity) {
                         await connection.rollback();
-                        return res.status(400).json({ error: `Cannot confirm: Batch for ${item.name} is expired.` });
-                    }
-                    if (item.qty < item.quantity) {
-                        await connection.rollback();
-                        return res.status(400).json({ error: `Insufficient stock for ${item.name}. Requested: ${item.quantity}, Available: ${item.qty}.` });
+                        return res.status(400).json({ error: `Insufficient unexpired stock for ${item.name}. Requested: ${item.quantity}, Available: ${item.unexpired_qty}.` });
                     }
                     if (item.requires_prescription) {
                         requiresPrescription = true;
@@ -260,6 +258,19 @@ export const updateOrderStatus = async (req: Request, res: Response): Promise<an
                 VALUES (?, ?, ?, ?, ?)
             `, [orderId, currentOrder.status, status, userId, reason || 'Status updated by user']);
             
+            // Trigger customer notification for order updates
+            const messages: Record<string, string> = {
+                'confirmed': `Your order ORD-${orderId} has been confirmed.`,
+                'preparing': `Your order ORD-${orderId} is being prepared.`,
+                'ready': `Your order ORD-${orderId} is ready for pickup or delivery.`,
+                'completed': `Your order ORD-${orderId} has been completed.`,
+                'cancelled': `Your order ORD-${orderId} has been cancelled.`,
+                'rejected': `Your order ORD-${orderId} has been rejected.`
+            };
+            if (messages[status]) {
+                await createNotification(connection, currentOrder.customer_id, 'ORDER', `Order ${status.charAt(0).toUpperCase() + status.slice(1)}`, messages[status], parseInt(orderId));
+            }
+            
             // If completed, we must deduct inventory and create a sale record
             if (status === 'completed' && currentOrder.status !== 'completed') {
                 // 1. Get order items
@@ -282,19 +293,23 @@ export const updateOrderStatus = async (req: Request, res: Response): Promise<an
                 // 3. Deduct inventory and insert sale_items
                 for (const item of items as any[]) {
                     // Check stock again FOR UPDATE
-                    const [drugStock] = await connection.query(`SELECT qty, name, is_active, exp_date FROM drugs WHERE id = ? FOR UPDATE`, [item.drug_id]);
+                    const [drugStock] = await connection.query(`
+                        SELECT d.stock as qty, d.name, d.is_active,
+                               COALESCE((SELECT SUM(quantity) FROM batches b WHERE b.drug_id = d.id AND b.exp_date > CURDATE()), 0) AS unexpired_qty
+                        FROM drugs d WHERE d.id = ? FOR UPDATE
+                    `, [item.drug_id]);
                     const currentStock = (drugStock as any[])[0];
                     if (currentStock.qty < item.quantity) {
                         await connection.rollback();
                         return res.status(400).json({ error: 'Insufficient inventory at completion for ' + currentStock.name });
                     }
-                    if (new Date(currentStock.exp_date) < new Date() || !currentStock.is_active) {
+                    if (currentStock.unexpired_qty < item.quantity || !currentStock.is_active) {
                         await connection.rollback();
                         return res.status(400).json({ error: 'Batch is expired or inactive at completion for ' + currentStock.name });
                     }
                     
                     // Deduct
-                    await connection.query(`UPDATE drugs SET qty = qty - ? WHERE id = ?`, [item.quantity, item.drug_id]);
+                    await connection.query(`UPDATE drugs SET stock = stock - ? WHERE id = ?`, [item.quantity, item.drug_id]);
                     
                     // Insert sale item
                     const itemTotal = (item.quantity * item.unit_price) - (item.discount || 0);
@@ -344,7 +359,7 @@ export const cancelOrder = async (req: Request, res: Response): Promise<any> => 
 
         await connection.beginTransaction();
 
-        const [orders] = await connection.query(`SELECT status FROM orders WHERE id = ? FOR UPDATE`, [orderId]);
+        const [orders] = await connection.query(`SELECT status, customer_id FROM orders WHERE id = ? FOR UPDATE`, [orderId]);
         if ((orders as any[]).length === 0) {
             await connection.rollback();
             return res.status(404).json({ error: 'Order not found' });
@@ -362,6 +377,8 @@ export const cancelOrder = async (req: Request, res: Response): Promise<any> => 
             INSERT INTO order_history (order_id, previous_status, new_status, changed_by, reason) 
             VALUES (?, ?, 'cancelled', ?, ?)
         `, [orderId, currentOrder.status, userId, reason || 'Cancelled by Admin']);
+
+        await createNotification(connection, currentOrder.customer_id, 'ORDER', 'Order Cancelled', `Your order ORD-${orderId} has been cancelled.`, parseInt(orderId));
 
         logAudit({
             userId: userId,

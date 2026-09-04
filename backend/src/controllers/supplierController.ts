@@ -4,7 +4,13 @@ import { RowDataPacket, ResultSetHeader } from 'mysql2';
 
 export const getSuppliers = async (req: Request, res: Response) => {
     try {
-        const { search, status } = req.query;
+        const { search, status, page, limit, sortField, sortOrder } = req.query;
+        
+        const isPaginated = page !== undefined;
+        const pageNum = parseInt(page as string) || 1;
+        const limitNum = parseInt(limit as string) || 15;
+        const offset = (pageNum - 1) * limitNum;
+        
         let query = `
             SELECT 
                 s.*, 
@@ -12,23 +18,48 @@ export const getSuppliers = async (req: Request, res: Response) => {
             FROM suppliers s
             WHERE 1=1
         `;
+        let countQuery = `SELECT COUNT(*) as total FROM suppliers s WHERE 1=1`;
         const queryParams: any[] = [];
 
         if (search) {
-            query += ` AND (s.name LIKE ? OR s.contact_person LIKE ? OR s.email LIKE ? OR s.phone LIKE ?)`;
+            const searchClause = ` AND (s.name LIKE ? OR s.contact_person LIKE ? OR s.email LIKE ? OR s.phone LIKE ?)`;
+            query += searchClause;
+            countQuery += searchClause;
             const searchParam = `%${search}%`;
             queryParams.push(searchParam, searchParam, searchParam, searchParam);
         }
 
         if (status) {
             query += ` AND s.status = ?`;
+            countQuery += ` AND s.status = ?`;
             queryParams.push(status);
         }
 
-        query += ` ORDER BY s.id DESC`;
+        // Sorting
+        const allowedSortFields = ['name', 'status', 'created_at', 'total_orders'];
+        const sort = allowedSortFields.includes(sortField as string) ? sortField : 'id';
+        const order = sortOrder === 'asc' ? 'ASC' : 'DESC';
+        
+        query += ` ORDER BY s.${sort} ${order}`;
 
-        const [rows] = await pool.query<RowDataPacket[]>(query, queryParams);
-        res.json(rows);
+        if (isPaginated) {
+            query += ` LIMIT ? OFFSET ?`;
+            
+            const [countRows] = await pool.query<RowDataPacket[]>(countQuery, queryParams);
+            const total = countRows[0].total;
+            
+            const [rows] = await pool.query<RowDataPacket[]>(query, [...queryParams, limitNum, offset]);
+            
+            res.json({
+                data: rows,
+                total,
+                page: pageNum,
+                totalPages: Math.ceil(total / limitNum)
+            });
+        } else {
+            const [rows] = await pool.query<RowDataPacket[]>(query, queryParams);
+            res.json(rows);
+        }
     } catch (error: any) {
         res.status(500).json({ message: error.message });
     }
@@ -60,9 +91,30 @@ export const getSupplierById = async (req: Request, res: Response) => {
             [id]
         );
 
+        // Get batches supplied by this supplier
+        const [batchesRows] = await pool.query<RowDataPacket[]>(
+            `SELECT b.*, d.name as drug_name, d.generic_name 
+             FROM batches b
+             JOIN drugs d ON b.drug_id = d.id
+             WHERE b.supplier_id = ? 
+             ORDER BY b.created_at DESC`,
+            [id]
+        );
+
+        // Get distinct products supplied by this supplier
+        const [productsRows] = await pool.query<RowDataPacket[]>(
+            `SELECT DISTINCT d.id, d.name, d.generic_name, d.stock, d.price, d.is_active as status
+             FROM drugs d 
+             JOIN batches b ON d.id = b.drug_id
+             WHERE b.supplier_id = ?`,
+            [id]
+        );
+
         res.json({
             ...supplier,
-            purchase_orders: ordersRows
+            purchase_orders: ordersRows,
+            batches: batchesRows,
+            products: productsRows
         });
     } catch (error: any) {
         res.status(500).json({ message: error.message });
@@ -189,6 +241,32 @@ export const updateSupplier = async (req: Request, res: Response): Promise<any> 
     } catch (error: any) {
         console.error('Update Supplier Error:', error);
         res.status(500).json({ message: 'Internal server error while updating supplier' });
+    }
+};
+
+export const deleteSupplier = async (req: Request, res: Response): Promise<any> => {
+    try {
+        const { id } = req.params;
+        
+        const [pos] = await pool.query<RowDataPacket[]>('SELECT id FROM purchase_orders WHERE supplier_id = ? LIMIT 1', [id]);
+        if (pos.length > 0) {
+            return res.status(400).json({ message: 'This supplier cannot be deleted because historical records (Purchase Orders) are associated with it. Deactivate the supplier instead.' });
+        }
+        
+        const [batches] = await pool.query<RowDataPacket[]>('SELECT id FROM batches WHERE supplier_id = ? LIMIT 1', [id]);
+        if (batches.length > 0) {
+            return res.status(400).json({ message: 'This supplier cannot be deleted because historical records (Batches) are associated with it. Deactivate the supplier instead.' });
+        }
+
+        const [result] = await pool.query<ResultSetHeader>('DELETE FROM suppliers WHERE id = ?', [id]);
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ message: 'Supplier not found' });
+        }
+        
+        res.json({ message: 'Supplier deleted successfully' });
+    } catch (error: any) {
+        console.error('Delete Supplier Error:', error);
+        res.status(500).json({ message: 'Internal server error while deleting supplier' });
     }
 };
 

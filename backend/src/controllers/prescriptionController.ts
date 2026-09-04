@@ -1,8 +1,9 @@
 import { Request, Response } from 'express';
-import pool from '../config/db';
+import pool from '../config/db.js';
 import path from 'path';
 import fs from 'fs';
 import { logAudit } from '../utils/auditLogger.js';
+import { createNotification } from './notificationController.js';
 
 export const getAllPrescriptions = async (req: Request, res: Response): Promise<any> => {
     try {
@@ -148,5 +149,89 @@ export const getPrescriptionFile = async (req: Request, res: Response): Promise<
     } catch (error: any) {
         console.error('Error fetching prescription file:', error);
         return res.status(500).json({ error: 'Server Error: ' + error.message });
+    }
+};
+
+export const updatePrescriptionStatus = async (req: Request, res: Response): Promise<any> => {
+    const connection = await pool.getConnection();
+    try {
+        const { id } = req.params;
+        const { status, notes } = req.body;
+        const userId = (req as any).user.id;
+
+        if (!['under_review', 'approved', 'rejected'].includes(status)) {
+            return res.status(400).json({ error: 'Invalid status' });
+        }
+
+        if (status === 'rejected' && !notes) {
+            return res.status(400).json({ error: 'Rejection reason is required' });
+        }
+
+        await connection.beginTransaction();
+
+        const [prescriptions] = await connection.query(`
+            SELECT p.id, p.status, p.order_id, o.customer_id 
+            FROM prescriptions p
+            JOIN orders o ON p.order_id = o.id
+            WHERE p.id = ? FOR UPDATE
+        `, [id]);
+
+        const prescList = prescriptions as any[];
+        if (prescList.length === 0) {
+            await connection.rollback();
+            return res.status(404).json({ error: 'Prescription not found' });
+        }
+
+        const prescription = prescList[0];
+
+        if (prescription.status === 'approved' || prescription.status === 'rejected') {
+            await connection.rollback();
+            return res.status(400).json({ error: 'Prescription is already ' + prescription.status });
+        }
+
+        // Only allow moving to under_review from pending
+        if (status === 'under_review' && prescription.status !== 'pending') {
+            await connection.rollback();
+            return res.status(400).json({ error: 'Can only start review for pending prescriptions' });
+        }
+
+        // Only allow moving to approved/rejected from under_review or pending
+        if ((status === 'approved' || status === 'rejected') && (prescription.status !== 'pending' && prescription.status !== 'under_review')) {
+             await connection.rollback();
+             return res.status(400).json({ error: 'Prescription must be pending or under review' });
+        }
+
+        await connection.query(`
+            UPDATE prescriptions 
+            SET status = ?, reviewed_by = ?, review_notes = ? 
+            WHERE id = ?
+        `, [status, userId, notes || null, id]);
+
+        const actionString = status === 'approved' ? 'APPROVE_PRESCRIPTION' : 
+                             status === 'rejected' ? 'REJECT_PRESCRIPTION' : 'REVIEW_PRESCRIPTION';
+
+        logAudit({
+            userId: userId,
+            action: actionString,
+            module: 'Prescriptions',
+            entityType: 'prescriptions',
+            entityId: parseInt(id, 10),
+            description: `Pharmacist/Admin updated prescription status to ${status}. Notes: ${notes || ''}`
+        });
+
+        if (status === 'approved') {
+            await createNotification(connection, prescription.customer_id, 'PRESCRIPTION', 'Prescription Approved', `Your prescription for order ORD-${prescription.order_id} has been approved.`, parseInt(id, 10));
+        } else if (status === 'rejected') {
+            await createNotification(connection, prescription.customer_id, 'PRESCRIPTION', 'Prescription Rejected', `Your prescription for order ORD-${prescription.order_id} was rejected. Reason: ${notes || 'Not provided'}`, parseInt(id, 10));
+        }
+
+        await connection.commit();
+        return res.json({ message: 'Prescription status updated successfully', status });
+    } catch (error: any) {
+        await connection.rollback();
+        console.error('Error updating prescription status:', error);
+        return res.status(500).json({ error: 'Server Error: ' + error.message });
+    } finally {
+        connection.release();
     }
 };

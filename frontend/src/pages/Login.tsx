@@ -34,8 +34,6 @@ export default function AuthPage() {
           navigate('/admin');
         } else if (parsedUser.role === 'pharmacist') {
           navigate('/pharmacist/dashboard');
-        } else if (parsedUser.role === 'staff' || parsedUser.role === 'inventory_staff') {
-          navigate('/inventory/dashboard');
         } else if (parsedUser.role === 'customer') {
           navigate('/customer/dashboard');
         } else if (parsedUser.role === 'student') {
@@ -109,8 +107,6 @@ export default function AuthPage() {
         navigate('/admin');
       } else if (userRole === 'pharmacist') {
         navigate('/pharmacist/dashboard');
-      } else if (userRole === 'staff' || userRole === 'inventory_staff') {
-        navigate('/inventory/dashboard');
       } else if (userRole === 'customer') {
         navigate('/customer/dashboard');
       } else if (userRole === 'student') {
@@ -390,7 +386,6 @@ export default function AuthPage() {
                 <option value="customer">Customer</option>
                 <option value="admin">Admin</option>
                 <option value="pharmacist">Pharmacist</option>
-                <option value="staff">Staff</option>
               </select>
             </div>
 

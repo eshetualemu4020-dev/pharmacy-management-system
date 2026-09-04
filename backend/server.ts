@@ -13,10 +13,19 @@ import salesRoutes from './src/routes/salesRoutes.js';
 import orderRoutes from './src/routes/orderRoutes.js';
 import prescriptionRoutes from './src/routes/prescriptionRoutes.js';
 import promotionRoutes from './src/routes/promotionRoutes.js';
+import notificationRoutes from './src/routes/notificationRoutes.js';
+import supportRoutes from './src/routes/supportRoutes.js';
+import inventoryRoutes from './src/routes/inventoryRoutes.js';
 import reportRoutes from './src/routes/reportRoutes.js';
 import auditRoutes from './src/routes/auditRoutes.js';
 import customerRoutes from './src/routes/customerRoutes.js';
 import settingsRoutes from './src/routes/settingsRoutes.js';
+import catalogRoutes from './src/routes/catalogRoutes.js';
+import wishlistRoutes from './src/routes/wishlistRoutes.js';
+import cartRoutes from './src/routes/cartRoutes.js';
+import customerOrderRoutes from './src/routes/customerOrderRoutes.js';
+import customerPrescriptionRoutes from './src/routes/customerPrescriptionRoutes.js';
+import dashboardRoutes from './src/routes/dashboardRoutes.js';
 import { rateLimit } from 'express-rate-limit';
 
 dotenv.config();
@@ -31,7 +40,7 @@ app.use(express.json());
 // Rate limiting
 const limiter = rateLimit({
 	windowMs: 15 * 60 * 1000, // 15 minutes
-	max: 100, // Limit each IP to 100 requests per `window` (here, per 15 minutes)
+	max: 10000, // Increased limit for development
 	standardHeaders: true,
 	legacyHeaders: false,
 });
@@ -53,6 +62,17 @@ app.use('/api/admin/reports', reportRoutes);
 app.use('/api/admin/audit-logs', auditRoutes);
 app.use('/api/customers', customerRoutes);
 app.use('/api/admin/settings', settingsRoutes);
+app.use('/api/catalog', catalogRoutes);
+app.use('/api/wishlist', wishlistRoutes);
+app.use('/api/cart', cartRoutes);
+app.use('/api/promotions', promotionRoutes);
+app.use('/api/notifications', notificationRoutes);
+app.use('/api/support', supportRoutes);
+app.use('/api/inventory', inventoryRoutes);
+app.use('/api/customer/orders', customerOrderRoutes);
+app.use('/api/customer/prescriptions', customerPrescriptionRoutes);
+app.use('/api/notifications', notificationRoutes);
+app.use('/api/dashboard', dashboardRoutes);
 
 const PORT = process.env.PORT || 8000;
 app.listen(PORT, () => {

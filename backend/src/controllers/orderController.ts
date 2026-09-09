@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import pool from '../config/db.js';
 import { logAudit } from '../utils/auditLogger.js';
 import { createNotification } from './notificationController.js';
+import { deductStock } from '../utils/stockService.js';
 
 export const getOrders = async (req: Request, res: Response): Promise<any> => {
     try {
@@ -292,31 +293,26 @@ export const updateOrderStatus = async (req: Request, res: Response): Promise<an
                 
                 // 3. Deduct inventory and insert sale_items
                 for (const item of items as any[]) {
-                    // Check stock again FOR UPDATE
-                    const [drugStock] = await connection.query(`
-                        SELECT d.stock as qty, d.name, d.is_active,
-                               COALESCE((SELECT SUM(quantity) FROM batches b WHERE b.drug_id = d.id AND b.exp_date > CURDATE()), 0) AS unexpired_qty
-                        FROM drugs d WHERE d.id = ? FOR UPDATE
-                    `, [item.drug_id]);
-                    const currentStock = (drugStock as any[])[0];
-                    if (currentStock.qty < item.quantity) {
-                        await connection.rollback();
-                        return res.status(400).json({ error: 'Insufficient inventory at completion for ' + currentStock.name });
+                    // Safely deduct stock (FEFO logic built-in)
+                    const batchesUsed = await deductStock(
+                        connection,
+                        item.drug_id,
+                        null, // Orders typically do not have a specific batch requested yet
+                        item.quantity,
+                        'sale',
+                        'orders',
+                        parseInt(orderId),
+                        userId
+                    );
+
+                    for (const bu of batchesUsed) {
+                        const proportionalTotal = bu.qty * item.unit_price;
+                        // Insert sale item properly matching the schema
+                        await connection.query(`
+                            INSERT INTO sale_items (sale_id, drug_id, batch_id, quantity, unit_price, subtotal) 
+                            VALUES (?, ?, ?, ?, ?, ?)
+                        `, [saleId, item.drug_id, bu.batch_id, bu.qty, item.unit_price, proportionalTotal]);
                     }
-                    if (currentStock.unexpired_qty < item.quantity || !currentStock.is_active) {
-                        await connection.rollback();
-                        return res.status(400).json({ error: 'Batch is expired or inactive at completion for ' + currentStock.name });
-                    }
-                    
-                    // Deduct
-                    await connection.query(`UPDATE drugs SET stock = stock - ? WHERE id = ?`, [item.quantity, item.drug_id]);
-                    
-                    // Insert sale item
-                    const itemTotal = (item.quantity * item.unit_price) - (item.discount || 0);
-                    await connection.query(`
-                        INSERT INTO sale_items (sale_id, drug_id, quantity, unit_price, discount, total_price) 
-                        VALUES (?, ?, ?, ?, ?, ?)
-                    `, [saleId, item.drug_id, item.quantity, item.unit_price, item.discount || 0, itemTotal]);
                 }
             }
         }

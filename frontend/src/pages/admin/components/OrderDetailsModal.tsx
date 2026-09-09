@@ -1,7 +1,7 @@
 import { formatCurrency } from '../../../utils/currency';
 import React, { useState, useEffect } from 'react';
 import { X, CheckCircle2, Clock, Truck, Package, XCircle, FileText, Download, Mail, Phone, MapPin, AlertCircle } from 'lucide-react';
-import { orderApi } from '../../../services/api';
+import { orderApi, prescriptionApi } from '../../../services/api';
 
 interface OrderDetailsModalProps {
   orderId: number;
@@ -301,9 +301,9 @@ export default function OrderDetailsModal({ orderId, onClose, onUpdate }: OrderD
                   </div>
                   <div>
                     <span className="text-muted text-sm">Document:</span>
-                    <a href={order.prescription_url} target="_blank" rel="noreferrer" className="block mt-1 text-[#9b51e0] hover:text-[#8b45cd] font-medium flex items-center transition-colors">
+                    <button onClick={() => prescriptionApi.downloadPrescriptionFile(order.prescription_id)} className="block mt-1 text-[#9b51e0] hover:text-[#8b45cd] font-medium flex items-center transition-colors text-left bg-transparent border-none cursor-pointer">
                       <Download className="w-4 h-4 mr-1" /> View Prescription
-                    </a>
+                    </button>
                   </div>
                   {order.prescription_notes && (
                     <div><span className="text-muted text-sm">Pharmacist Notes:</span> <p className="text-main text-sm bg-hover p-2 rounded-lg mt-1">{order.prescription_notes}</p></div>

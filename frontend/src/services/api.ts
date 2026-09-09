@@ -54,9 +54,7 @@ const getAuthHeaders = () => ({
 const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
   const response = await fetch(url, options);
   if (response.status === 401) {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    window.location.href = '/login';
+    window.dispatchEvent(new CustomEvent('auth:expired'));
     throw new Error('Session expired. Please log in again.');
   }
   return response;
@@ -657,7 +655,18 @@ export const prescriptionApi = {
     if (!response.ok) throw new Error(data.error || 'Failed to review prescription');
     return data;
   },
-  getPrescriptionFileUrl: (id: number | string) => `${API_BASE_URL}/api/admin/prescriptions/${id}/file`
+  getPrescriptionFileUrl: (id: number | string) => `${API_BASE_URL}/api/admin/prescriptions/${id}/file`,
+  downloadPrescriptionFile: async (id: number | string) => {
+    const response = await fetchWithAuth(`${API_BASE_URL}/api/admin/prescriptions/${id}/file`, {
+      headers: getAuthHeaders()
+    });
+    if (!response.ok) {
+      throw new Error('Failed to download prescription file');
+    }
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+    window.open(url, '_blank');
+  }
 };
 
 export const customerApi = {
@@ -712,6 +721,17 @@ export const customerApi = {
     const data = await response.json();
     if (!response.ok) throw new Error(data.error || 'Failed to fetch customer prescriptions');
     return data;
+  },
+  downloadMyPrescriptionFile: async (prescId: number | string) => {
+    const response = await fetchWithAuth(`${API_BASE_URL}/api/customer/prescriptions/${prescId}/file`, {
+      headers: getAuthHeaders()
+    });
+    if (!response.ok) {
+      throw new Error('Failed to download prescription file');
+    }
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+    window.open(url, '_blank');
   }
 };
 

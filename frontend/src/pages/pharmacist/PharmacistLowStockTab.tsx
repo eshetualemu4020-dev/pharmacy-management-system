@@ -15,9 +15,10 @@ export default function PharmacistLowStockTab() {
   const fetchDrugs = async () => {
     try {
       setLoading(true);
-      const data = await inventoryApi.getList();
+      const res = await inventoryApi.getList();
+      const drugsData = res.data || [];
       // Filter only low stock items
-      const lowStockItems = data.filter((d: any) => d.total_stock <= d.min_stock_level);
+      const lowStockItems = drugsData.filter((d: any) => d.stock <= d.min_stock_level);
       setDrugs(lowStockItems);
     } catch (err: any) {
       setError(err.message || 'Failed to fetch inventory');
@@ -79,7 +80,7 @@ export default function PharmacistLowStockTab() {
               </thead>
               <tbody>
                 {filteredDrugs.map((drug) => {
-                  const isOutOfStock = drug.total_stock === 0;
+                  const isOutOfStock = drug.stock === 0;
                   return (
                     <tr key={drug.id} className="border-b border-subtle hover:bg-hover transition-colors">
                       <td className="p-4">
@@ -96,7 +97,7 @@ export default function PharmacistLowStockTab() {
                       <td className="p-4 text-muted">{drug.category_name || 'N/A'}</td>
                       <td className="p-4">
                         <span className={`font-bold ${isOutOfStock ? 'text-red-400' : 'text-yellow-400'}`}>
-                          {drug.total_stock}
+                          {drug.stock}
                         </span>
                       </td>
                       <td className="p-4 text-muted">{drug.min_stock_level}</td>

@@ -1,13 +1,11 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import db from '../config/db.js';
-import { Request, Response } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import { RowDataPacket } from 'mysql2';
 import { logAudit } from '../utils/auditLogger.js';
 
-
-
-export const login = async (req: Request, res: Response): Promise<any> => {
+export const login = async (req: Request, res: Response, next: NextFunction): Promise<any> => {
     const { email, password } = req.body;
 
     if (!email || !password) {
@@ -57,12 +55,11 @@ export const login = async (req: Request, res: Response): Promise<any> => {
             }
         });
     } catch (error) {
-        console.error('Login error:', error);
-        res.status(500).json({ error: 'Internal server error' });
+        next(error);
     }
 };
 
-export const register = async (req: Request, res: Response): Promise<any> => {
+export const register = async (req: Request, res: Response, next: NextFunction): Promise<any> => {
     const { name, email, password, role } = req.body;
 
     if (!name || !email || !password) {
@@ -96,15 +93,11 @@ export const register = async (req: Request, res: Response): Promise<any> => {
         }
         res.status(201).json({ message: 'User created successfully' });
     } catch (error: any) {
-        console.error('Register error:', error);
-        if (error.code === 'ER_DUP_ENTRY') {
-            return res.status(409).json({ error: 'An account with this name or email already exists.' });
-        }
-        res.status(500).json({ error: 'Internal server error' });
+        next(error);
     }
 };
 
-export const registerStaff = async (req: Request, res: Response): Promise<any> => {
+export const registerStaff = async (req: Request, res: Response, next: NextFunction): Promise<any> => {
     // Only used for initial setup or by admin later.
     const { username, email, password, role } = req.body;
 
@@ -120,7 +113,6 @@ export const registerStaff = async (req: Request, res: Response): Promise<any> =
         );
         res.status(201).json({ message: 'Staff user created successfully' });
     } catch (error) {
-        console.error('Register error:', error);
-        res.status(500).json({ error: 'Internal server error' });
+        next(error);
     }
 };

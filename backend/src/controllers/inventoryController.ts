@@ -321,9 +321,17 @@ export const adjustStock = async (req: Request, res: Response): Promise<any> => 
 
         // 2. Create transaction record
         let actualChange = transaction_type === 'REMOVE' ? -qtyInt : qtyInt;
+        
+        const [adjustmentResult] = await connection.query<ResultSetHeader>(
+            'INSERT INTO stock_adjustments (drug_id, batch_id, adjustment_qty, reason, notes, adjusted_by) VALUES (?, ?, ?, ?, ?, ?)',
+            [drug_id, batchId, actualChange, transaction_type, remarks || '', (req as any).user?.id || 1]
+        );
+        const adjustmentId = adjustmentResult.insertId;
+
         await connection.query(
-            'INSERT INTO inventory_transactions (drug_id, batch_id, transaction_type, quantity, remarks) VALUES (?, ?, ?, ?, ?)',
-            [drug_id, batchId, transaction_type, actualChange, remarks || '']
+            `INSERT INTO stock_movements (drug_id, batch_id, change_qty, reason, reference_table, reference_id, created_by)
+             VALUES (?, ?, ?, 'adjustment', 'stock_adjustments', ?, ?)`,
+            [drug_id, batchId, actualChange, adjustmentId, (req as any).user?.id || 1]
         );
 
         // 3. Update overall drug stock

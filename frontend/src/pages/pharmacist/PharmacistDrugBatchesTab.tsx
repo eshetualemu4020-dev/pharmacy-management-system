@@ -16,8 +16,8 @@ export default function PharmacistDrugBatchesTab() {
   const fetchBatches = async () => {
     try {
       setLoading(true);
-      const data = await inventoryApi.getAllBatches();
-      setBatches(data);
+      const res = await inventoryApi.getAllBatches();
+      setBatches(res.data || []);
     } catch (err: any) {
       setError(err.message || 'Failed to fetch batches');
     } finally {

@@ -5,6 +5,7 @@ import {
   TrendingUp, ShoppingBag, FileText, Tag, BarChart, BarChart3, LogOut,
   Search, Filter, Edit, Eye, ShieldAlert, Key, CheckCircle, XCircle, Bell, Moon, Sun
 } from 'lucide-react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { userApi, dashboardApi } from '../../services/api';
 import { useTheme } from '../../context/ThemeContext';
 import CategoriesTab from './CategoriesTab';
@@ -25,9 +26,7 @@ import SettingsTab from './components/SettingsTab';
 import ProfileTab from './components/ProfileTab';
 
 export default function AdminDashboard() {
-  const [users, setUsers] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const queryClient = useQueryClient();
   const { theme, toggleTheme } = useTheme();
   const [activeTab, setActiveTab] = useState<'dashboard' | 'users' | 'categories' | 'drugs' | 'inventory-batches' | 'inventory-low-stock' | 'inventory-expiring' | 'inventory-expired' | 'suppliers' | 'purchase-orders' | 'sales' | 'orders' | 'prescriptions' | 'promotions' | 'reports' | 'audit-logs' | 'settings' | 'profile'>('dashboard');
   const [isInventoryMenuOpen, setIsInventoryMenuOpen] = useState(false);
@@ -52,45 +51,64 @@ export default function AdminDashboard() {
   });
 
   const [currentUser, setCurrentUser] = useState<any>(null);
-  const [stats, setStats] = useState({ users: 0, categories: 0, drugs: 0, lowStock: 0, expiring: 0, expired: 0 });
 
   useEffect(() => {
-    fetchUsers();
     const userStr = localStorage.getItem('user');
     if (userStr) {
       setCurrentUser(JSON.parse(userStr));
     }
-  }, [roleFilter, statusFilter]);
+  }, []);
 
-  useEffect(() => {
-    if (activeTab === 'dashboard') {
-      fetchStats();
-    }
-  }, [activeTab]);
+  const { data: stats = { users: 0, categories: 0, drugs: 0, lowStock: 0, expiring: 0, expired: 0 } } = useQuery({
+    queryKey: ['adminStats'],
+    queryFn: () => dashboardApi.getAdminStats(),
+    enabled: activeTab === 'dashboard'
+  });
 
-  const fetchStats = async () => {
-    try {
-      const data = await dashboardApi.getAdminStats();
-      setStats(data);
-    } catch (err) {
-      console.error('Failed to fetch dashboard stats:', err);
-    }
-  };
-
-  const fetchUsers = async () => {
-    try {
-      setLoading(true);
+  const { data: users = [], isLoading: loading, error: fetchError } = useQuery({
+    queryKey: ['users', roleFilter, statusFilter],
+    queryFn: () => {
       const params: any = {};
       if (roleFilter) params.role = roleFilter;
       if (statusFilter) params.status = statusFilter;
-      const data = await userApi.getUsers(params);
-      setUsers(data);
-    } catch (err: any) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
+      return userApi.getUsers(params);
     }
-  };
+  });
+
+  const error = fetchError ? (fetchError as Error).message : '';
+
+  const saveUserMutation = useMutation({
+    mutationFn: (data: any) => isEditModalOpen && selectedUser ? userApi.updateUser(selectedUser.id, data) : userApi.createUser(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['users'] });
+      setIsAddModalOpen(false);
+      setIsEditModalOpen(false);
+    },
+    onError: (err: any) => {
+      alert(err.message);
+    }
+  });
+
+  const toggleStatusMutation = useMutation({
+    mutationFn: (user: any) => userApi.updateStatus(user.id, user.status === 'active' ? 'inactive' : 'active'),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['users'] });
+    },
+    onError: (err: any) => {
+      alert(err.message);
+    }
+  });
+
+  const resetPasswordMutation = useMutation({
+    mutationFn: (password: string) => userApi.resetPassword(selectedUser.id, password),
+    onSuccess: () => {
+      setIsResetModalOpen(false);
+      alert('Password reset successfully!');
+    },
+    onError: (err: any) => {
+      alert(err.message);
+    }
+  });
 
   const handleSearch = () => {
     // Basic frontend search filter on already fetched data
@@ -119,41 +137,18 @@ export default function AdminDashboard() {
     setIsEditModalOpen(true);
   };
 
-  const handleSaveUser = async (e: React.FormEvent) => {
+  const handleSaveUser = (e: React.FormEvent) => {
     e.preventDefault();
-    try {
-      if (isEditModalOpen && selectedUser) {
-        await userApi.updateUser(selectedUser.id, formData);
-        setIsEditModalOpen(false);
-      } else {
-        await userApi.createUser(formData);
-        setIsAddModalOpen(false);
-      }
-      fetchUsers();
-    } catch (err: any) {
-      alert(err.message);
-    }
+    saveUserMutation.mutate(formData);
   };
 
-  const handleToggleStatus = async (user: any) => {
-    try {
-      const newStatus = user.status === 'active' ? 'inactive' : 'active';
-      await userApi.updateStatus(user.id, newStatus);
-      fetchUsers();
-    } catch (err: any) {
-      alert(err.message);
-    }
+  const handleToggleStatus = (user: any) => {
+    toggleStatusMutation.mutate(user);
   };
 
-  const handleResetPassword = async (e: React.FormEvent) => {
+  const handleResetPassword = (e: React.FormEvent) => {
     e.preventDefault();
-    try {
-      await userApi.resetPassword(selectedUser.id, formData.password);
-      setIsResetModalOpen(false);
-      alert('Password reset successfully!');
-    } catch (err: any) {
-      alert(err.message);
-    }
+    resetPasswordMutation.mutate(formData.password);
   };
 
   return (

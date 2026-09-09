@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import AuthPage from './pages/Login';
 
@@ -11,6 +11,18 @@ import { ProtectedRoute } from './components/ProtectedRoute';
 import { ThemeProvider } from './context/ThemeContext';
 
 function App() {
+  useEffect(() => {
+    const handleAuthExpired = () => {
+      alert('Your session has expired or is invalid. Please log in again to continue.');
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      window.location.href = '/login';
+    };
+
+    window.addEventListener('auth:expired', handleAuthExpired);
+    return () => window.removeEventListener('auth:expired', handleAuthExpired);
+  }, []);
+
   return (
     <ThemeProvider>
       <Router>

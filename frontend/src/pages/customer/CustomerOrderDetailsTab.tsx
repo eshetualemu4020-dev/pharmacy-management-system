@@ -4,7 +4,7 @@ import {
   MapPin, CreditCard, FileText, AlertCircle, RefreshCw,
   Truck, ShoppingBag, ArrowRight
 } from 'lucide-react';
-import { customerOrderApi, cartApi } from '../../services/api';
+import { customerOrderApi, cartApi, customerApi } from '../../services/api';
 
 interface OrderItem {
   id: number;
@@ -352,6 +352,15 @@ const CustomerOrderDetailsTab: React.FC<CustomerOrderDetailsTabProps> = ({ order
                 }`}>
                   {formatStatus(order.prescription_status || 'Pending')}
                 </span>
+              </div>
+              <div className="flex justify-between items-center bg-base/50 p-4 rounded-xl border border-blue-500/10 text-sm mt-3">
+                <span className="text-muted font-bold">Document</span>
+                <button
+                  onClick={() => customerApi.downloadMyPrescriptionFile(order.prescription_id!)}
+                  className="px-3 py-1 bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 rounded-lg font-bold text-xs transition-colors"
+                >
+                  View File
+                </button>
               </div>
               {order.prescription_notes && (
                 <p className="text-sm text-blue-400 mt-3 bg-base/50 p-3 rounded-xl border border-blue-500/10 italic">

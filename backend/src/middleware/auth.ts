@@ -36,3 +36,22 @@ export const requireRole = (roles: string[]) => {
         next();
     };
 };
+
+export const roleCapabilities: Record<string, string[]> = {
+    admin: ['manage_inventory', 'manage_users', 'review_prescriptions', 'view_reports', 'manage_promotions', 'adjust_stock'],
+    pharmacist: ['view_inventory', 'review_prescriptions', 'process_sales'],
+    customer: ['place_orders', 'view_own_orders', 'manage_own_prescriptions']
+};
+
+export const requireCapability = (capability: string) => {
+    return (req: Request, res: Response, next: NextFunction): any => {
+        if (!req.user || !req.user.role) {
+            return res.status(403).json({ error: 'Forbidden: No role assigned' });
+        }
+        const capabilities = roleCapabilities[req.user.role] || [];
+        if (!capabilities.includes(capability)) {
+            return res.status(403).json({ error: `Forbidden: Missing capability ${capability}` });
+        }
+        next();
+    };
+};

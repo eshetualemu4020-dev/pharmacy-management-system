@@ -285,9 +285,9 @@ export const checkout = async (req: Request, res: Response): Promise<void> => {
         const orderStatus = requiresPrescription ? 'pending_prescription' : 'placed';
         
         const [orderResult] = await connection.query(`
-            INSERT INTO orders (customer_id, status, total_amount, payment_method, payment_status, delivery_method, delivery_address, delivery_instructions) 
-            VALUES (?, ?, ?, ?, 'Pending', ?, ?, ?)
-        `, [customerId, orderStatus, totalAmount, payment_method, delivery_method, delivery_address, delivery_instructions]);
+            INSERT INTO orders (customer_id, status, total_amount, payment_status, delivery_method, delivery_address, notes) 
+            VALUES (?, ?, ?, 'pending', ?, ?, ?)
+        `, [customerId, orderStatus, totalAmount, delivery_method, delivery_address, delivery_instructions]);
         
         const orderId = (orderResult as any).insertId;
 
@@ -360,9 +360,15 @@ export const confirmPayment = async (req: Request, res: Response): Promise<void>
 
             // Update order
             await connection.query(`
-                UPDATE orders SET payment_status = 'Paid' 
+                UPDATE orders SET payment_status = 'completed' 
                 WHERE id = ? AND customer_id = ?
             `, [orderId, customerId]);
+
+            // Insert into payments table
+            await connection.query(`
+                INSERT INTO payments (order_id, amount, method, status, transaction_ref)
+                VALUES (?, ?, 'Card', 'completed', ?)
+            `, [orderId, paymentIntent.amount / 100, payment_intent_id]);
 
             await connection.query(`
                 INSERT INTO order_history (order_id, previous_status, new_status, reason) 

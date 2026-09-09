@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import pool from '../config/db.js';
 import { calculatePromotionDiscount } from './promotionController.js';
 import { logAudit } from '../utils/auditLogger.js';
+import { deductStock, addStock } from '../utils/stockService.js';
 
 export const getSales = async (req: Request, res: Response) => {
     try {
@@ -221,27 +222,16 @@ export const refundSale = async (req: Request, res: Response) => {
         const [items] = await connection.query('SELECT * FROM sale_items WHERE sale_id = ?', [saleId]);
 
         for (const item of (items as any[])) {
-            if (item.batch_id) {
-                // Return to batch
-                await connection.query('UPDATE batches SET quantity = quantity + ? WHERE id = ?', [item.quantity, item.batch_id]);
-                // Return to main drug stock
-                await connection.query('UPDATE drugs SET stock = stock + ? WHERE id = ?', [item.quantity, item.drug_id]);
-
-                // Log inventory transaction
-                await connection.query(`
-                    INSERT INTO inventory_transactions (drug_id, batch_id, transaction_type, quantity, remarks)
-                    VALUES (?, ?, 'ADD', ?, ?)
-                `, [item.drug_id, item.batch_id, item.quantity, `Refund for Sale #${saleId}`]);
-            } else {
-                // No batch, just update drug stock
-                await connection.query('UPDATE drugs SET stock = stock + ? WHERE id = ?', [item.quantity, item.drug_id]);
-
-                // Log inventory transaction
-                await connection.query(`
-                    INSERT INTO inventory_transactions (drug_id, batch_id, transaction_type, quantity, remarks)
-                    VALUES (?, NULL, 'ADD', ?, ?)
-                `, [item.drug_id, item.quantity, `Refund for Sale #${saleId}`]);
-            }
+            await addStock(
+                connection,
+                item.drug_id,
+                item.batch_id,
+                item.quantity,
+                'return',
+                'sales',
+                parseInt(saleId),
+                (req as any).user?.id || 1
+            );
         }
 
         // Update sale status
@@ -280,34 +270,14 @@ export const createSale = async (req: Request, res: Response) => {
         for (const item of items) {
             const { drug_id, batch_id, quantity, unit_price } = item;
             
-            // Validate stock
-            const [drugRows] = await connection.query('SELECT stock, name FROM drugs WHERE id = ? FOR UPDATE', [drug_id]);
+            // Validate basic drug rules before deducting
+            const [drugRows] = await connection.query('SELECT name, requires_prescription FROM drugs WHERE id = ?', [drug_id]);
             if ((drugRows as any[]).length === 0) {
                 throw new Error(`Drug with ID ${drug_id} not found`);
             }
-            
             const drug = (drugRows as any)[0];
-            
             if (drug.requires_prescription && !item.prescription_verified) {
                 throw new Error(`Drug ${drug.name} requires a valid prescription, but none was verified.`);
-            }
-
-            if (drug.stock < quantity) {
-                throw new Error(`Insufficient stock for drug ${drug.name}. Available: ${drug.stock}`);
-            }
-
-            if (batch_id) {
-                const [batchRows] = await connection.query('SELECT quantity, exp_date FROM batches WHERE id = ? FOR UPDATE', [batch_id]);
-                if ((batchRows as any[]).length === 0 || (batchRows as any)[0].quantity < quantity) {
-                    throw new Error(`Insufficient stock in batch ${batch_id} for drug ${drug.name}`);
-                }
-                
-                const batchExpDate = new Date((batchRows as any)[0].exp_date);
-                const today = new Date();
-                today.setHours(0, 0, 0, 0);
-                if (batchExpDate < today) {
-                    throw new Error(`Cannot sell: Batch ${batch_id} for drug ${drug.name} has expired.`);
-                }
             }
 
             const itemSubtotal = quantity * unit_price;
@@ -319,7 +289,8 @@ export const createSale = async (req: Request, res: Response) => {
                 batch_id,
                 quantity,
                 unit_price,
-                subtotal: itemSubtotal
+                subtotal: itemSubtotal,
+                drug_name: drug.name
             });
         }
 
@@ -346,24 +317,34 @@ export const createSale = async (req: Request, res: Response) => {
 
         // Insert Sale Items and update inventory
         for (const item of processedItems) {
-            await connection.query(`
-                INSERT INTO sale_items (sale_id, drug_id, batch_id, quantity, unit_price, subtotal)
-                VALUES (?, ?, ?, ?, ?, ?)
-            `, [saleId, item.drug_id, item.batch_id || null, item.quantity, item.unit_price, item.subtotal]);
+            // Deduct stock safely (this handles FEFO and logs to stock_movements)
+            const batchesUsed = await deductStock(
+                connection,
+                item.drug_id,
+                item.batch_id,
+                item.quantity,
+                'sale',
+                'sales',
+                saleId,
+                user_id
+            );
 
-            // Deduct stock
-            await connection.query('UPDATE drugs SET stock = stock - ? WHERE id = ?', [item.quantity, item.drug_id]);
-            
-            if (item.batch_id) {
-                await connection.query('UPDATE batches SET quantity = quantity - ? WHERE id = ?', [item.quantity, item.batch_id]);
+            // Record each batch deduction as a sale line item
+            for (const bu of batchesUsed) {
+                // We divide subtotal proportionally if we split across batches (or just store unit price)
+                const proportionalSubtotal = bu.qty * item.unit_price;
+                await connection.query(`
+                    INSERT INTO sale_items (sale_id, drug_id, batch_id, quantity, unit_price, subtotal)
+                    VALUES (?, ?, ?, ?, ?, ?)
+                `, [saleId, item.drug_id, bu.batch_id, bu.qty, item.unit_price, proportionalSubtotal]);
             }
-
-            // Log inventory transaction
-            await connection.query(`
-                INSERT INTO inventory_transactions (drug_id, batch_id, transaction_type, quantity, remarks)
-                VALUES (?, ?, 'REMOVE', ?, ?)
-            `, [item.drug_id, item.batch_id || null, item.quantity, `Sale #${saleId}`]);
         }
+
+        // NEW: Insert Payment record
+        await connection.query(
+            'INSERT INTO payments (sale_id, amount, method, status) VALUES (?, ?, ?, ?)',
+            [saleId, total_amount, payment_method, 'completed']
+        );
 
         await connection.commit();
 

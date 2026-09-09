@@ -1,0 +1,49 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Use Node.js 20.x
+      uses: actions/setup-node@v3
+      with:
+        node-version: '20.x'
+        cache: 'npm'
+        cache-dependency-path: '**/package-lock.json'
+
+    # Backend
+    - name: Install Backend Dependencies
+      run: |
+        cd backend
+        npm ci
+
+    - name: Build Backend (if applicable)
+      run: |
+        cd backend
+        # Add build steps if necessary (e.g., tsc)
+        # npm run build
+        
+    # Frontend
+    - name: Install Frontend Dependencies
+      run: |
+        cd frontend
+        npm ci
+
+    - name: Build Frontend
+      run: |
+        cd frontend
+        npm run build
+
+    - name: Test Frontend
+      run: |
+        cd frontend
+        npm run test --if-present

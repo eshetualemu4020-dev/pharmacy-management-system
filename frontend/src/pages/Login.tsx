@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Eye, EyeOff, Mail, Lock, User, ArrowRight, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useMutation } from '@tanstack/react-query';
 import { authApi } from '../services/api';
 
 export default function AuthPage() {
@@ -77,22 +78,9 @@ export default function AuthPage() {
     return null;
   };
 
-  const handleLogin = async (e) => {
-    e.preventDefault();
-    setError('');
-    setSuccess('');
-    
-    const validationError = validateLoginForm();
-    if (validationError) {
-      setError(validationError);
-      return;
-    }
-
-    setIsLoading(true);
-
-    try {
-      const data = await authApi.login({ email, password });
-      
+  const loginMutation = useMutation({
+    mutationFn: (credentials: any) => authApi.login(credentials),
+    onSuccess: (data) => {
       localStorage.setItem('token', data.token);
       localStorage.setItem('user', JSON.stringify(data.user));
       
@@ -116,15 +104,40 @@ export default function AuthPage() {
         localStorage.removeItem('user');
         setError('Unauthorized role.');
       }
-      
-    } catch (err) {
+    },
+    onError: (err: any) => {
       setError(err.message || 'An unexpected error occurred. Please try again.');
-    } finally {
-      setIsLoading(false);
     }
+  });
+
+  const registerMutation = useMutation({
+    mutationFn: (userData: any) => authApi.register(userData),
+    onSuccess: () => {
+      setSuccess("Account created successfully! Please log in.");
+      setView('login');
+      setPassword('');
+      setConfirmPassword('');
+    },
+    onError: (err: any) => {
+      setError(err.message || 'Registration failed.');
+    }
+  });
+
+  const handleLogin = (e: any) => {
+    e.preventDefault();
+    setError('');
+    setSuccess('');
+    
+    const validationError = validateLoginForm();
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
+
+    loginMutation.mutate({ email, password });
   };
 
-  const handleRegister = async (e) => {
+  const handleRegister = (e: any) => {
     e.preventDefault();
     setError('');
     setSuccess('');
@@ -135,18 +148,7 @@ export default function AuthPage() {
       return;
     }
 
-    setIsLoading(true);
-    try {
-      await authApi.register({ name, email, password, role });
-      setSuccess("Account created successfully! Please log in.");
-      setView('login');
-      setPassword('');
-      setConfirmPassword('');
-    } catch (err) {
-      setError(err.message || 'Registration failed.');
-    } finally {
-      setIsLoading(false);
-    }
+    registerMutation.mutate({ name, email, password, role });
   };
 
   const handleForgotPassword = (e) => {
@@ -266,11 +268,11 @@ export default function AuthPage() {
             </div>
 
             <button 
-              disabled={isLoading || !email || !password} 
+              disabled={loginMutation.isPending || !email || !password} 
               type="submit" 
               className="w-full flex items-center justify-center py-4 bg-[#9b51e0] hover:bg-[#8b45cd] active:bg-[#7a39b7] disabled:bg-[#9b51e0]/50 disabled:cursor-not-allowed text-white rounded-xl text-[16px] font-bold transition-colors mt-6"
             >
-              {isLoading ? (
+              {loginMutation.isPending ? (
                 <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
               ) : (
                 <>
@@ -390,11 +392,11 @@ export default function AuthPage() {
             </div>
 
             <button 
-              disabled={isLoading || !name || !email || !password || !confirmPassword} 
+              disabled={registerMutation.isPending || !name || !email || !password || !confirmPassword} 
               type="submit" 
               className="w-full flex items-center justify-center py-4 bg-[#9b51e0] hover:bg-[#8b45cd] active:bg-[#7a39b7] disabled:bg-[#9b51e0]/50 disabled:cursor-not-allowed text-white rounded-xl text-[16px] font-bold transition-colors mt-6"
             >
-              {isLoading ? (
+              {registerMutation.isPending ? (
                 <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
               ) : (
                 'Create Account'

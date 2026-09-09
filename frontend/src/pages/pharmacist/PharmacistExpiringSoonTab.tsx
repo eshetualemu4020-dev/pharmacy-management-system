@@ -15,11 +15,12 @@ export default function PharmacistExpiringSoonTab() {
   const fetchBatches = async () => {
     try {
       setLoading(true);
-      const data = await inventoryApi.getAllBatches();
+      const res = await inventoryApi.getAllBatches();
+      const batchesData = res.data || [];
       
       const today = new Date();
       // Filter batches that are expired or expiring within 3 months
-      const expiringBatches = data.filter((b: any) => {
+      const expiringBatches = batchesData.filter((b: any) => {
         const expDate = new Date(b.exp_date);
         const monthsToExpiry = (expDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24 * 30);
         return monthsToExpiry <= 3;

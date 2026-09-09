@@ -8,6 +8,7 @@ import PharmacistDashboard from './pages/pharmacist/PharmacistDashboard';
 import CustomerDashboard from './pages/customer/CustomerDashboard';
 
 import { ProtectedRoute } from './components/ProtectedRoute';
+import { ErrorBoundary } from './components/ErrorBoundary';
 import { ThemeProvider } from './context/ThemeContext';
 
 function App() {
@@ -34,17 +35,23 @@ function App() {
         {/* Dashboards */}
         <Route path="/admin/*" element={
           <ProtectedRoute allowedRoles={['admin']}>
-            <AdminDashboard />
+            <ErrorBoundary>
+              <AdminDashboard />
+            </ErrorBoundary>
           </ProtectedRoute>
         } />
         <Route path="/pharmacist/*" element={
           <ProtectedRoute allowedRoles={['pharmacist']}>
-            <PharmacistDashboard />
+            <ErrorBoundary>
+              <PharmacistDashboard />
+            </ErrorBoundary>
           </ProtectedRoute>
         } />
         <Route path="/customer/*" element={
           <ProtectedRoute allowedRoles={['customer']}>
-            <CustomerDashboard />
+            <ErrorBoundary>
+              <CustomerDashboard />
+            </ErrorBoundary>
           </ProtectedRoute>
         } />
 

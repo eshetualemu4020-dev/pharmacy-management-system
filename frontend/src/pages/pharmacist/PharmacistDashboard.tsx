@@ -23,6 +23,8 @@ export default function PharmacistDashboard() {
   const [isInventoryOpen, setIsInventoryOpen] = useState(false);
   const [isPrescriptionsOpen, setIsPrescriptionsOpen] = useState(true);
   const [activeTab, setActiveTab] = useState('dashboard');
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isDesktopSidebarCollapsed, setIsDesktopSidebarCollapsed] = useState(false);
   const [navigationState, setNavigationState] = useState<any>(null);
   const { theme, toggleTheme } = useTheme();
 
@@ -157,44 +159,63 @@ export default function PharmacistDashboard() {
   };
 
   return (
-    <div className="h-screen overflow-hidden bg-base flex font-sans">
+    <div className="h-screen w-full bg-base text-main flex font-sans">
+      {/* Sidebar Overlay (Mobile) */}
+      {isSidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden transition-opacity"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+
       {/* Sidebar */}
-      <div className="w-64 shrink-0 bg-surface border-r border-subtle flex flex-col p-6 h-full">
-        <div className="flex items-center space-x-3 mb-12 shrink-0">
-          <div className="w-10 h-10 bg-gradient-to-br from-[#10b981] to-[#059669] rounded-xl flex items-center justify-center">
-            <Activity className="w-5 h-5 text-main" />
+      <div className={`fixed lg:relative inset-y-0 left-0 z-50 shrink-0 bg-surface border-r border-subtle flex flex-col h-full transition-all duration-300 ease-in-out ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0 ${isDesktopSidebarCollapsed ? 'w-64 lg:w-20 p-6 lg:px-4 lg:py-6 lg:items-center' : 'w-64 p-6'}`}>
+        <div className={`flex items-center justify-between mb-12 shrink-0 ${isDesktopSidebarCollapsed ? 'lg:justify-center' : 'w-full'}`}>
+          <div className="flex items-center space-x-3">
+            <div className="w-10 h-10 shrink-0 bg-gradient-to-br from-[#10b981] to-[#059669] rounded-xl flex items-center justify-center shadow-lg shadow-[#10b981]/20">
+              <Activity className="w-5 h-5 text-white" />
+            </div>
+            <div className={`${isDesktopSidebarCollapsed ? 'lg:hidden' : 'block'}`}>
+              <h2 className="text-sm font-bold text-main tracking-wide leading-tight">PHARMACIST</h2>
+              <h2 className="text-sm font-bold text-[#10b981] tracking-wide leading-tight">PORTAL</h2>
+            </div>
           </div>
-          <div>
-            <h2 className="text-sm font-bold text-main tracking-wide leading-tight">PHARMACIST</h2>
-            <h2 className="text-sm font-bold text-[#10b981] tracking-wide leading-tight">PORTAL</h2>
-          </div>
+          <button 
+            className="p-1 lg:hidden text-muted hover:text-main rounded-lg hover:bg-hover transition-colors"
+            onClick={() => setIsSidebarOpen(false)}
+          >
+            <XCircle className="w-5 h-5" />
+          </button>
         </div>
 
-        <nav className="space-y-1 flex-1 overflow-y-auto pr-2 pb-4 custom-scrollbar">
+        <nav className={`space-y-1 flex-1 overflow-y-auto pb-4 custom-scrollbar ${isDesktopSidebarCollapsed ? 'w-full' : 'pr-2'}`}>
           <button 
             onClick={() => setActiveTab('dashboard')}
-            className={`w-full flex items-center space-x-3 px-4 py-2.5 rounded-xl font-medium transition-colors ${
+            className={`w-full flex items-center space-x-3 py-2.5 rounded-xl font-medium transition-colors ${
               activeTab === 'dashboard' ? 'bg-[#10b981]/10 text-[#10b981]' : 'text-muted hover:bg-hover hover:text-main'
-            }`}
+            } ${isDesktopSidebarCollapsed ? 'justify-center px-0' : 'px-4'}`}
           >
-            <LayoutDashboard className="w-5 h-5" />
-            <span>Dashboard</span>
+            <LayoutDashboard className="w-5 h-5 shrink-0" />
+            <span className={isDesktopSidebarCollapsed ? 'lg:hidden' : 'block'}>Dashboard</span>
           </button>
           
           {/* Inventory Dropdown */}
           <div className="space-y-1">
             <button 
-              onClick={() => setIsInventoryOpen(!isInventoryOpen)}
-              className="w-full flex items-center justify-between px-4 py-2.5 text-muted hover:bg-hover hover:text-main rounded-xl font-medium transition-colors"
+              onClick={() => {
+                if (isDesktopSidebarCollapsed) setIsDesktopSidebarCollapsed(false);
+                setIsInventoryOpen(!isInventoryOpen);
+              }}
+              className={`w-full flex items-center justify-between py-2.5 text-muted hover:bg-hover hover:text-main rounded-xl font-medium transition-colors ${isDesktopSidebarCollapsed ? 'justify-center px-0' : 'px-4'}`}
             >
               <div className="flex items-center space-x-3">
-                <Package className="w-5 h-5" />
-                <span>Inventory</span>
+                <Package className="w-5 h-5 shrink-0" />
+                <span className={isDesktopSidebarCollapsed ? 'lg:hidden' : 'block'}>Inventory</span>
               </div>
-              {isInventoryOpen ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+              {!isDesktopSidebarCollapsed && (isInventoryOpen ? <ChevronDown className="w-4 h-4 shrink-0" /> : <ChevronRight className="w-4 h-4 shrink-0" />)}
             </button>
             
-            {isInventoryOpen && (
+            {isInventoryOpen && !isDesktopSidebarCollapsed && (
               <div className="pl-11 pr-2 space-y-1">
                 <button 
                   onClick={() => setActiveTab('drugs')}
@@ -202,7 +223,7 @@ export default function PharmacistDashboard() {
                     activeTab === 'drugs' ? 'bg-white/10 text-white' : 'text-muted hover:text-white'
                   }`}
                 >
-                  <Pill className="w-4 h-4" />
+                  <Pill className="w-4 h-4 shrink-0" />
                   <span>Drugs</span>
                 </button>
                 <button 
@@ -211,7 +232,7 @@ export default function PharmacistDashboard() {
                     activeTab === 'batches' ? 'bg-white/10 text-white' : 'text-muted hover:text-white'
                   }`}
                 >
-                  <Layers className="w-4 h-4" />
+                  <Layers className="w-4 h-4 shrink-0" />
                   <span>Drug Batches</span>
                 </button>
                 <button 
@@ -220,7 +241,7 @@ export default function PharmacistDashboard() {
                     activeTab === 'low_stock' ? 'bg-white/10 text-white' : 'text-muted hover:text-white'
                   }`}
                 >
-                  <AlertTriangle className="w-4 h-4 text-[#f59e0b]" />
+                  <AlertTriangle className="w-4 h-4 text-[#f59e0b] shrink-0" />
                   <span>Low Stock</span>
                 </button>
                 <button 
@@ -229,7 +250,7 @@ export default function PharmacistDashboard() {
                     activeTab === 'expiring' ? 'bg-white/10 text-white' : 'text-muted hover:text-white'
                   }`}
                 >
-                  <Clock className="w-4 h-4 text-[#f59e0b]" />
+                  <Clock className="w-4 h-4 text-[#f59e0b] shrink-0" />
                   <span>Expiring Soon</span>
                 </button>
               </div>
@@ -238,38 +259,41 @@ export default function PharmacistDashboard() {
 
           <button 
             onClick={() => setActiveTab('pos')}
-            className={`w-full flex items-center space-x-3 px-4 py-2.5 rounded-xl font-medium transition-colors ${
+            className={`w-full flex items-center space-x-3 py-2.5 rounded-xl font-medium transition-colors ${
               activeTab === 'pos' ? 'bg-[#10b981]/10 text-[#10b981]' : 'text-muted hover:bg-hover hover:text-main'
-            }`}
+            } ${isDesktopSidebarCollapsed ? 'justify-center px-0' : 'px-4'}`}
           >
-            <ShoppingCart className="w-5 h-5" />
-            <span>Sales / POS</span>
+            <ShoppingCart className="w-5 h-5 shrink-0" />
+            <span className={isDesktopSidebarCollapsed ? 'lg:hidden' : 'block'}>Sales / POS</span>
           </button>
 
           <button 
             onClick={() => setActiveTab('orders')}
-            className={`w-full flex items-center space-x-3 px-4 py-2.5 rounded-xl font-medium transition-colors ${
+            className={`w-full flex items-center space-x-3 py-2.5 rounded-xl font-medium transition-colors ${
               activeTab === 'orders' ? 'bg-[#10b981]/10 text-[#10b981]' : 'text-muted hover:bg-hover hover:text-main'
-            }`}
+            } ${isDesktopSidebarCollapsed ? 'justify-center px-0' : 'px-4'}`}
           >
-            <ShoppingBag className="w-5 h-5" />
-            <span>Orders</span>
+            <ShoppingBag className="w-5 h-5 shrink-0" />
+            <span className={isDesktopSidebarCollapsed ? 'lg:hidden' : 'block'}>Orders</span>
           </button>
 
           {/* Prescriptions Dropdown */}
           <div className="space-y-1">
             <button 
-              onClick={() => setIsPrescriptionsOpen(!isPrescriptionsOpen)}
-              className="w-full flex items-center justify-between px-4 py-2.5 text-muted hover:bg-hover hover:text-main rounded-xl font-medium transition-colors"
+              onClick={() => {
+                if (isDesktopSidebarCollapsed) setIsDesktopSidebarCollapsed(false);
+                setIsPrescriptionsOpen(!isPrescriptionsOpen);
+              }}
+              className={`w-full flex items-center justify-between py-2.5 text-muted hover:bg-hover hover:text-main rounded-xl font-medium transition-colors ${isDesktopSidebarCollapsed ? 'justify-center px-0' : 'px-4'}`}
             >
               <div className="flex items-center space-x-3">
-                <FileText className="w-5 h-5" />
-                <span>Prescriptions</span>
+                <FileText className="w-5 h-5 shrink-0" />
+                <span className={isDesktopSidebarCollapsed ? 'lg:hidden' : 'block'}>Prescriptions</span>
               </div>
-              {isPrescriptionsOpen ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+              {!isDesktopSidebarCollapsed && (isPrescriptionsOpen ? <ChevronDown className="w-4 h-4 shrink-0" /> : <ChevronRight className="w-4 h-4 shrink-0" />)}
             </button>
             
-            {isPrescriptionsOpen && (
+            {isPrescriptionsOpen && !isDesktopSidebarCollapsed && (
               <div className="pl-11 pr-2 space-y-1">
                 <button 
                   onClick={() => setActiveTab('prescriptions')}
@@ -277,7 +301,7 @@ export default function PharmacistDashboard() {
                     activeTab === 'prescriptions' ? 'bg-white/10 text-white' : 'text-muted hover:text-white'
                   }`}
                 >
-                  <Clock className="w-4 h-4 text-[#f59e0b]" />
+                  <Clock className="w-4 h-4 text-[#f59e0b] shrink-0" />
                   <span>All Prescriptions</span>
                 </button>
               </div>
@@ -286,32 +310,32 @@ export default function PharmacistDashboard() {
 
           <button 
             onClick={() => setActiveTab('customers')}
-            className={`w-full flex items-center space-x-3 px-4 py-2.5 rounded-xl font-medium transition-colors ${
+            className={`w-full flex items-center space-x-3 py-2.5 rounded-xl font-medium transition-colors ${
               activeTab === 'customers' ? 'bg-[#10b981]/10 text-[#10b981]' : 'text-muted hover:bg-hover hover:text-main'
-            }`}
+            } ${isDesktopSidebarCollapsed ? 'justify-center px-0' : 'px-4'}`}
           >
-            <Users className="w-5 h-5" />
-            <span>Customers</span>
+            <Users className="w-5 h-5 shrink-0" />
+            <span className={isDesktopSidebarCollapsed ? 'lg:hidden' : 'block'}>Customers</span>
           </button>
 
           <button 
             onClick={() => setActiveTab('sales_history')}
-            className={`w-full flex items-center space-x-3 px-4 py-2.5 rounded-xl font-medium transition-colors ${
+            className={`w-full flex items-center space-x-3 py-2.5 rounded-xl font-medium transition-colors ${
               activeTab === 'sales_history' ? 'bg-[#10b981]/10 text-[#10b981]' : 'text-muted hover:bg-hover hover:text-main'
-            }`}
+            } ${isDesktopSidebarCollapsed ? 'justify-center px-0' : 'px-4'}`}
           >
-            <History className="w-5 h-5" />
-            <span>Sales History</span>
+            <History className="w-5 h-5 shrink-0" />
+            <span className={isDesktopSidebarCollapsed ? 'lg:hidden' : 'block'}>Sales History</span>
           </button>
 
           <button 
             onClick={() => setActiveTab('reports')}
-            className={`w-full flex items-center space-x-3 px-4 py-2.5 rounded-xl font-medium transition-colors ${
+            className={`w-full flex items-center space-x-3 py-2.5 rounded-xl font-medium transition-colors ${
               activeTab === 'reports' ? 'bg-[#10b981]/10 text-[#10b981]' : 'text-muted hover:bg-hover hover:text-main'
-            }`}
+            } ${isDesktopSidebarCollapsed ? 'justify-center px-0' : 'px-4'}`}
           >
-            <BarChart className="w-5 h-5" />
-            <span>Reports</span>
+            <BarChart className="w-5 h-5 shrink-0" />
+            <span className={isDesktopSidebarCollapsed ? 'lg:hidden' : 'block'}>Reports</span>
           </button>
 
         </nav>
@@ -320,7 +344,39 @@ export default function PharmacistDashboard() {
       {/* Main Content */}
       <div className="flex-1 flex flex-col h-full overflow-hidden min-w-0">
         {/* Global Top Header */}
-        <div className="h-16 w-full flex justify-end items-center px-8 shrink-0 border-b border-subtle bg-surface-alt/50 backdrop-blur-md">
+        <div className="h-16 w-full flex justify-between items-center px-4 lg:px-8 shrink-0 border-b border-subtle bg-surface-alt/50 backdrop-blur-md">
+          {/* Header Left (Hamburger & Title) */}
+          <div className="flex items-center space-x-3">
+            {/* Mobile Hamburger */}
+            <button
+              className="p-2 lg:hidden text-muted hover:text-main transition-colors rounded-lg hover:bg-hover"
+              onClick={() => setIsSidebarOpen(true)}
+            >
+              <div className="w-6 h-6 flex flex-col justify-center items-center space-y-1">
+                <span className="w-5 h-0.5 bg-current rounded-full"></span>
+                <span className="w-5 h-0.5 bg-current rounded-full"></span>
+                <span className="w-5 h-0.5 bg-current rounded-full"></span>
+              </div>
+            </button>
+            {/* Desktop Hamburger */}
+            <button
+              className="p-2 hidden lg:block text-muted hover:text-main transition-colors rounded-lg hover:bg-hover"
+              onClick={() => setIsDesktopSidebarCollapsed(!isDesktopSidebarCollapsed)}
+            >
+              <div className="w-6 h-6 flex flex-col justify-center items-center space-y-1">
+                <span className="w-5 h-0.5 bg-current rounded-full"></span>
+                <span className="w-5 h-0.5 bg-current rounded-full"></span>
+                <span className="w-5 h-0.5 bg-current rounded-full"></span>
+              </div>
+            </button>
+            
+            {/* Title - Visible on mobile, or on desktop only when sidebar is collapsed */}
+            <div className={`flex items-center space-x-1 ${isDesktopSidebarCollapsed ? 'lg:flex' : 'lg:hidden'}`}>
+              <h2 className="text-sm font-bold text-main tracking-wide leading-tight">Pharmacist</h2>
+              <h2 className="text-sm font-bold text-[#10b981] tracking-wide leading-tight">Portal</h2>
+            </div>
+          </div>
+          
           <div className="flex items-center space-x-3">
             {/* Theme Toggle */}
             <button 

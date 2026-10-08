@@ -294,9 +294,9 @@ export const checkout = async (req: Request, res: Response): Promise<void> => {
         // 3. Create Order Items
         for (const item of (items as any[])) {
             await connection.query(`
-                INSERT INTO order_items (order_id, drug_id, quantity, unit_price, discount, total_price) 
-                VALUES (?, ?, ?, ?, 0, ?)
-            `, [orderId, item.drug_id, item.quantity, item.price, item.quantity * item.price]);
+                INSERT INTO order_items (order_id, drug_id, quantity, unit_price, discount) 
+                VALUES (?, ?, ?, ?, 0)
+            `, [orderId, item.drug_id, item.quantity, item.price]);
         }
 
         // 4. Create Initial Order History

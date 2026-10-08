@@ -52,7 +52,7 @@ export const CustomerCategoriesTab: React.FC<CustomerCategoriesTabProps> = ({ on
             </div>
           </div>
 
-          <form onSubmit={handleSearchSubmit} className="flex gap-2">
+          <form onSubmit={handleSearchSubmit} className="flex flex-col sm:flex-row gap-3">
             <div className="relative flex-1">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted" />
               <input
@@ -63,14 +63,14 @@ export const CustomerCategoriesTab: React.FC<CustomerCategoriesTabProps> = ({ on
                 className="w-full bg-base border border-subtle-hover rounded-xl py-3 pl-12 pr-4 text-main placeholder:text-muted focus:outline-none focus:border-[#6b4cff]/50 focus:ring-1 focus:ring-[#6b4cff]/50 transition-all"
               />
             </div>
-            <button type="submit" className="px-6 py-3 bg-[#6b4cff] hover:bg-[#5a3ee0] text-white rounded-xl font-medium transition-colors">
+            <button type="submit" className="px-6 py-3 bg-[#6b4cff] hover:bg-[#5a3ee0] text-white rounded-xl font-medium transition-colors w-full sm:w-auto">
               Search
             </button>
             {search && (
               <button 
                 type="button" 
                 onClick={() => { setSearch(''); fetchCategories(''); }} 
-                className="px-4 py-3 bg-hover hover:bg-white/10 text-white rounded-xl font-medium transition-colors"
+                className="px-4 py-3 bg-hover hover:bg-white/10 text-white rounded-xl font-medium transition-colors w-full sm:w-auto"
               >
                 Clear
               </button>

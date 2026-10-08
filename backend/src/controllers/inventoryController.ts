@@ -187,7 +187,7 @@ export const getAllBatches = async (req: Request, res: Response): Promise<any> =
             JOIN drugs d ON b.drug_id = d.id
             LEFT JOIN suppliers s ON b.supplier_id = s.id
             LEFT JOIN purchase_orders po ON b.purchase_order_id = po.id
-            WHERE d.is_active = 1
+            WHERE 1=1
         `;
         
         let countQuery = `
@@ -195,7 +195,7 @@ export const getAllBatches = async (req: Request, res: Response): Promise<any> =
             FROM batches b
             JOIN drugs d ON b.drug_id = d.id
             LEFT JOIN suppliers s ON b.supplier_id = s.id
-            WHERE d.is_active = 1
+            WHERE 1=1
         `;
 
         const params: any[] = [];

@@ -110,14 +110,14 @@ const CustomerOrdersTab: React.FC<CustomerOrdersTabProps> = ({ onViewOrderDetail
 
   return (
     <div className="h-full bg-base overflow-y-auto">
-      <div className="p-8 max-w-7xl mx-auto space-y-8">
+      <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-4 md:space-y-8">
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-3xl font-bold text-main flex items-center gap-3">
+            <h1 className="text-2xl md:text-3xl font-bold text-main flex items-center gap-2 md:gap-3">
               <ShoppingBag className="text-[#6b4cff]" size={32} />
               My Orders
             </h1>
-            <p className="text-muted mt-2">Track and manage your order history.</p>
+            <p className="text-sm md:text-base text-muted mt-2">Track and manage your order history.</p>
           </div>
           <button 
             onClick={fetchOrders}

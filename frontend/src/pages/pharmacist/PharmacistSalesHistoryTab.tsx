@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Search, History, DollarSign, Calendar, Eye, FileText, ChevronLeft, ChevronRight, X, AlertCircle, ShoppingBag, Hash, Clock, Package } from 'lucide-react';
 import { salesApi } from '../../services/api';
+import { formatCurrency } from '../../utils/currency';
 
 const PharmacistSalesHistoryTab: React.FC = () => {
   // List State
@@ -139,8 +140,8 @@ const PharmacistSalesHistoryTab: React.FC = () => {
                       {item.batch_number && <div className="text-xs text-gray-500">Batch: {item.batch_number}</div>}
                     </td>
                     <td className="text-center py-3">{item.quantity}</td>
-                    <td className="text-right py-3 text-sm">${parseFloat(item.unit_price).toFixed(2)}</td>
-                    <td className="text-right py-3 font-semibold">${parseFloat(item.subtotal).toFixed(2)}</td>
+                    <td className="text-right py-3 text-sm">{formatCurrency(item.unit_price)}</td>
+                    <td className="text-right py-3 font-semibold">{formatCurrency(item.subtotal)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -148,17 +149,17 @@ const PharmacistSalesHistoryTab: React.FC = () => {
             
             <div className="flex justify-end mb-8">
               <div className="w-64 space-y-2">
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Subtotal:</span>
-                  <span>${parseFloat(selectedSale.subtotal || 0).toFixed(2)}</span>
+                <div className="flex justify-between items-center text-sm text-muted mb-2">
+                  <span>Subtotal</span>
+                  <span>{formatCurrency(selectedSale.subtotal || 0)}</span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Discount:</span>
-                  <span>-${parseFloat(selectedSale.discount || 0).toFixed(2)}</span>
+                <div className="flex justify-between items-center text-sm text-red-400 mb-4">
+                  <span>Discount</span>
+                  <span>-{formatCurrency(selectedSale.discount || 0)}</span>
                 </div>
-                <div className="flex justify-between text-xl font-bold border-t border-gray-300 pt-2 mt-2">
-                  <span>Total:</span>
-                  <span>${parseFloat(selectedSale.total_amount).toFixed(2)}</span>
+                <div className="flex justify-between items-center text-lg font-bold text-main">
+                  <span>Total Paid</span>
+                  <span>{formatCurrency(selectedSale.total_amount)}</span>
                 </div>
               </div>
             </div>
@@ -287,9 +288,9 @@ const PharmacistSalesHistoryTab: React.FC = () => {
                   {selectedSale.payment_status}
                 </p>
               </div>
-              <div>
-                <p className="text-muted text-sm mb-1">Total Amount</p>
-                <p className="text-[#10b981] font-bold text-2xl">${parseFloat(selectedSale.total_amount).toFixed(2)}</p>
+              <div className="text-right">
+                <p className="text-xs text-muted mb-1">Total Amount</p>
+                <p className="text-[#10b981] font-bold text-2xl">{formatCurrency(selectedSale.total_amount)}</p>
               </div>
             </div>
           </div>
@@ -346,8 +347,8 @@ const PharmacistSalesHistoryTab: React.FC = () => {
                         x{item.quantity}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-main">${parseFloat(item.unit_price).toFixed(2)}</td>
-                    <td className="px-6 py-4 text-[#10b981] font-semibold">${parseFloat(item.subtotal).toFixed(2)}</td>
+                    <td className="px-6 py-4 text-main">{formatCurrency(item.unit_price)}</td>
+                    <td className="px-6 py-4 text-[#10b981] font-semibold">{formatCurrency(item.subtotal)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -355,17 +356,17 @@ const PharmacistSalesHistoryTab: React.FC = () => {
           </div>
           <div className="p-6 bg-white/[0.02] border-t border-subtle flex justify-end">
             <div className="w-64 space-y-3">
-              <div className="flex justify-between text-muted">
-                <span>Subtotal</span>
-                <span className="text-main">${parseFloat(selectedSale.subtotal || 0).toFixed(2)}</span>
+              <div className="flex justify-between items-center border-t border-subtle pt-4">
+                <span className="text-muted">Subtotal</span>
+                <span className="text-main">{formatCurrency(selectedSale.subtotal || 0)}</span>
               </div>
-              <div className="flex justify-between text-muted">
-                <span>Discount</span>
-                <span className="text-red-400">-${parseFloat(selectedSale.discount || 0).toFixed(2)}</span>
+              <div className="flex justify-between items-center mt-2">
+                <span className="text-muted">Discount</span>
+                <span className="text-red-400">-{formatCurrency(selectedSale.discount || 0)}</span>
               </div>
-              <div className="flex justify-between text-main font-bold text-lg pt-3 border-t border-subtle-hover">
-                <span>Total</span>
-                <span className="text-[#10b981]">${parseFloat(selectedSale.total_amount).toFixed(2)}</span>
+              <div className="flex justify-between items-center mt-4 text-lg font-bold">
+                <span className="text-main">Total Paid</span>
+                <span className="text-[#10b981]">{formatCurrency(selectedSale.total_amount)}</span>
               </div>
             </div>
           </div>
@@ -392,7 +393,7 @@ const PharmacistSalesHistoryTab: React.FC = () => {
             </div>
             <div>
               <p className="text-muted text-sm">Today's Sales</p>
-              <p className="text-2xl font-bold text-main">${parseFloat(stats.today_sales).toFixed(2)}</p>
+              <p className="text-2xl font-bold text-main">{formatCurrency(stats.today_sales)}</p>
             </div>
           </div>
           <div className="bg-surface border border-subtle p-6 rounded-2xl flex items-center space-x-4">
@@ -401,7 +402,7 @@ const PharmacistSalesHistoryTab: React.FC = () => {
             </div>
             <div>
               <p className="text-muted text-sm">Total Revenue</p>
-              <p className="text-2xl font-bold text-main">${parseFloat(stats.total_sales).toFixed(2)}</p>
+              <p className="text-2xl font-bold text-main">{formatCurrency(stats.total_sales)}</p>
             </div>
           </div>
           <div className="bg-surface border border-subtle p-6 rounded-2xl flex items-center space-x-4">
@@ -564,7 +565,7 @@ const PharmacistSalesHistoryTab: React.FC = () => {
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <span className="text-[#10b981] font-semibold">${parseFloat(sale.total_amount).toFixed(2)}</span>
+                      <span className="text-[#10b981] font-semibold">{formatCurrency(sale.total_amount)}</span>
                     </td>
                     <td className="px-6 py-4">
                       <span className={`px-2.5 py-1 rounded-full text-xs font-bold uppercase ${getStatusColor(sale.sale_status)}`}>

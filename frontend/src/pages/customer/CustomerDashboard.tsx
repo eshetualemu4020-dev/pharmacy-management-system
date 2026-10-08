@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
   Home, Pill, Grid, ShoppingCart, ShoppingBag,
-  FileText, Heart, Bell, User, HelpCircle, LogOut, Moon, Sun
+  FileText, Heart, Bell, User, HelpCircle, LogOut, Moon, Sun, Menu, X
 } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import CustomerHomeTab from './CustomerHomeTab';
@@ -28,6 +28,8 @@ export default function CustomerDashboard() {
   const currentUser = userStr ? JSON.parse(userStr) : null;
   const [activeTab, setActiveTab] = useState('home');
   const [contextId, setContextId] = useState<any>(null);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isDesktopSidebarCollapsed, setIsDesktopSidebarCollapsed] = useState(false);
   const [cartCount, setCartCount] = useState(0);
   const [wishlistCount, setWishlistCount] = useState(0);
   const [unreadNotificationsCount, setUnreadNotificationsCount] = useState(0);
@@ -65,6 +67,7 @@ export default function CustomerDashboard() {
   const handleNavigate = (tab: string, id?: any) => {
     setActiveTab(tab);
     setContextId(id);
+    setIsSidebarOpen(false);
   };
 
   const renderTabContent = () => {
@@ -133,96 +136,114 @@ export default function CustomerDashboard() {
   };
 
   return (
-    <div className="h-screen overflow-hidden bg-base text-main flex font-sans">
+    <div className="h-screen w-full bg-base text-main flex font-sans">
+      {/* Sidebar Overlay (Mobile) */}
+      {isSidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden transition-opacity"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+
       {/* Sidebar */}
-      <div className="w-64 shrink-0 bg-surface-alt border-r border-subtle flex flex-col p-6 h-full">
-        <div className="flex items-center justify-between mb-12 shrink-0">
+      <div className={`fixed lg:relative inset-y-0 left-0 z-50 shrink-0 bg-surface-alt border-r border-subtle flex flex-col h-full transition-all duration-300 ease-in-out ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0 ${isDesktopSidebarCollapsed ? 'w-64 lg:w-20 p-6 lg:px-4 lg:py-6 lg:items-center' : 'w-64 p-6'}`}>
+        <div className={`flex items-center justify-between mb-12 shrink-0 ${isDesktopSidebarCollapsed ? 'lg:justify-center' : 'w-full'}`}>
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-[#6b4cff] to-[#5839e0] rounded-xl flex items-center justify-center shadow-lg shadow-[#6b4cff]/20">
+            <div className="w-10 h-10 shrink-0 bg-gradient-to-br from-[#6b4cff] to-[#5839e0] rounded-xl flex items-center justify-center shadow-lg shadow-[#6b4cff]/20">
               <User className="w-5 h-5 text-main" />
             </div>
-            <div>
+            <div className={`${isDesktopSidebarCollapsed ? 'lg:hidden' : 'block'}`}>
               <h2 className="text-sm font-bold text-main tracking-wide leading-tight">CUSTOMER</h2>
               <h2 className="text-sm font-bold text-[#6b4cff] tracking-wide leading-tight">PORTAL</h2>
             </div>
           </div>
+          <button 
+            className="p-1 lg:hidden text-muted hover:text-main rounded-lg hover:bg-hover transition-colors"
+            onClick={() => setIsSidebarOpen(false)}
+          >
+            <X className="w-5 h-5" />
+          </button>
         </div>
 
-        <nav className="space-y-1 flex-1 overflow-y-auto pr-2 pb-4 custom-scrollbar">
+        <nav className={`space-y-1 flex-1 overflow-y-auto pb-4 custom-scrollbar ${isDesktopSidebarCollapsed ? 'w-full' : 'pr-2'}`}>
           <button 
             onClick={() => handleNavigate('home')}
-            className={`w-full flex items-center space-x-3 px-4 py-2.5 rounded-xl font-medium transition-colors ${activeTab === 'home' ? 'bg-[#6b4cff]/10 text-[#6b4cff]' : 'text-muted hover:bg-hover hover:text-white'}`}
+            className={`w-full flex items-center space-x-3 py-2.5 rounded-xl font-medium transition-colors ${activeTab === 'home' ? 'bg-[#6b4cff]/10 text-[#6b4cff]' : 'text-muted hover:bg-hover hover:text-white'} ${isDesktopSidebarCollapsed ? 'justify-center px-0' : 'px-4'}`}
           >
-            <Home className="w-5 h-5" />
-            <span>Home</span>
+            <Home className="w-5 h-5 shrink-0" />
+            <span className={isDesktopSidebarCollapsed ? 'lg:hidden' : 'block'}>Home</span>
           </button>
 
           <button 
             onClick={() => handleNavigate('browse_drugs')}
-            className={`w-full flex items-center space-x-3 px-4 py-2.5 rounded-xl font-medium transition-colors ${activeTab === 'browse_drugs' || activeTab === 'product_details' ? 'bg-[#6b4cff]/10 text-[#6b4cff]' : 'text-muted hover:bg-hover hover:text-white'}`}
+            className={`w-full flex items-center space-x-3 py-2.5 rounded-xl font-medium transition-colors ${activeTab === 'browse_drugs' || activeTab === 'product_details' ? 'bg-[#6b4cff]/10 text-[#6b4cff]' : 'text-muted hover:bg-hover hover:text-white'} ${isDesktopSidebarCollapsed ? 'justify-center px-0' : 'px-4'}`}
           >
-            <Pill className="w-5 h-5" />
-            <span>Browse Drugs</span>
+            <Pill className="w-5 h-5 shrink-0" />
+            <span className={isDesktopSidebarCollapsed ? 'lg:hidden' : 'block'}>Browse Drugs</span>
           </button>
 
           <button 
             onClick={() => handleNavigate('categories')}
-            className={`w-full flex items-center space-x-3 px-4 py-2.5 rounded-xl font-medium transition-colors ${activeTab === 'categories' ? 'bg-[#6b4cff]/10 text-[#6b4cff]' : 'text-muted hover:bg-hover hover:text-white'}`}
+            className={`w-full flex items-center space-x-3 py-2.5 rounded-xl font-medium transition-colors ${activeTab === 'categories' ? 'bg-[#6b4cff]/10 text-[#6b4cff]' : 'text-muted hover:bg-hover hover:text-white'} ${isDesktopSidebarCollapsed ? 'justify-center px-0' : 'px-4'}`}
           >
-            <Grid className="w-5 h-5" />
-            <span>Categories</span>
+            <Grid className="w-5 h-5 shrink-0" />
+            <span className={isDesktopSidebarCollapsed ? 'lg:hidden' : 'block'}>Categories</span>
           </button>
 
           <button 
             onClick={() => handleNavigate('cart')}
-            className={`w-full flex items-center justify-between px-4 py-2.5 rounded-xl font-medium transition-colors ${activeTab === 'cart' ? 'bg-[#6b4cff]/10 text-[#6b4cff]' : 'text-muted hover:bg-hover hover:text-white'}`}
+            className={`w-full flex items-center justify-between py-2.5 rounded-xl font-medium transition-colors ${activeTab === 'cart' ? 'bg-[#6b4cff]/10 text-[#6b4cff]' : 'text-muted hover:bg-hover hover:text-white'} ${isDesktopSidebarCollapsed ? 'justify-center px-0 relative' : 'px-4'}`}
           >
-            <div className="flex items-center space-x-3">
-              <ShoppingCart className="w-5 h-5" />
-              <span>Cart</span>
+            <div className={`flex items-center space-x-3 ${isDesktopSidebarCollapsed ? 'justify-center' : ''}`}>
+              <ShoppingCart className="w-5 h-5 shrink-0" />
+              <span className={isDesktopSidebarCollapsed ? 'lg:hidden' : 'block'}>Cart</span>
             </div>
             {cartCount > 0 && (
-              <span className="bg-[#6b4cff] text-white text-xs font-bold px-2 py-0.5 rounded-full">{cartCount}</span>
+              <span className={isDesktopSidebarCollapsed ? 'absolute top-1 right-1 bg-[#6b4cff] text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full' : 'bg-[#6b4cff] text-white text-xs font-bold px-2 py-0.5 rounded-full'}>
+                {cartCount}
+              </span>
             )}
           </button>
 
           <button 
             onClick={() => handleNavigate('orders')}
-            className={`w-full flex items-center space-x-3 px-4 py-2.5 rounded-xl font-medium transition-colors ${activeTab === 'orders' || activeTab === 'order_details' ? 'bg-[#6b4cff]/10 text-[#6b4cff]' : 'text-muted hover:bg-hover hover:text-white'}`}
+            className={`w-full flex items-center space-x-3 py-2.5 rounded-xl font-medium transition-colors ${activeTab === 'orders' || activeTab === 'order_details' ? 'bg-[#6b4cff]/10 text-[#6b4cff]' : 'text-muted hover:bg-hover hover:text-white'} ${isDesktopSidebarCollapsed ? 'justify-center px-0' : 'px-4'}`}
           >
-            <ShoppingBag className="w-5 h-5" />
-            <span>My Orders</span>
+            <ShoppingBag className="w-5 h-5 shrink-0" />
+            <span className={isDesktopSidebarCollapsed ? 'lg:hidden' : 'block'}>My Orders</span>
           </button>
 
           <button 
             onClick={() => handleNavigate('prescriptions')}
-            className={`w-full flex items-center space-x-3 px-4 py-2.5 rounded-xl font-medium transition-colors ${activeTab === 'prescriptions' || activeTab === 'prescription-details' || activeTab === 'prescription-upload' ? 'bg-[#6b4cff]/10 text-[#6b4cff]' : 'text-muted hover:bg-hover hover:text-white'}`}
+            className={`w-full flex items-center space-x-3 py-2.5 rounded-xl font-medium transition-colors ${activeTab === 'prescriptions' || activeTab === 'prescription-details' || activeTab === 'prescription-upload' ? 'bg-[#6b4cff]/10 text-[#6b4cff]' : 'text-muted hover:bg-hover hover:text-white'} ${isDesktopSidebarCollapsed ? 'justify-center px-0' : 'px-4'}`}
           >
-            <FileText className="w-5 h-5" />
-            <span>Prescriptions</span>
+            <FileText className="w-5 h-5 shrink-0" />
+            <span className={isDesktopSidebarCollapsed ? 'lg:hidden' : 'block'}>Prescriptions</span>
           </button>
 
           <button 
             onClick={() => handleNavigate('wishlist')}
-            className={`w-full flex items-center justify-between px-4 py-2.5 rounded-xl font-medium transition-colors ${activeTab === 'wishlist' ? 'bg-[#6b4cff]/10 text-[#6b4cff]' : 'text-muted hover:bg-hover hover:text-white'}`}
+            className={`w-full flex items-center justify-between py-2.5 rounded-xl font-medium transition-colors ${activeTab === 'wishlist' ? 'bg-[#6b4cff]/10 text-[#6b4cff]' : 'text-muted hover:bg-hover hover:text-white'} ${isDesktopSidebarCollapsed ? 'justify-center px-0 relative' : 'px-4'}`}
           >
-            <div className="flex items-center space-x-3">
-              <Heart className="w-5 h-5" />
-              <span>Wishlist</span>
+            <div className={`flex items-center space-x-3 ${isDesktopSidebarCollapsed ? 'justify-center' : ''}`}>
+              <Heart className="w-5 h-5 shrink-0" />
+              <span className={isDesktopSidebarCollapsed ? 'lg:hidden' : 'block'}>Wishlist</span>
             </div>
             {wishlistCount > 0 && (
-              <span className="bg-[#6b4cff] text-white text-xs font-bold px-2 py-0.5 rounded-full">{wishlistCount}</span>
+              <span className={isDesktopSidebarCollapsed ? 'absolute top-1 right-1 bg-[#6b4cff] text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full' : 'bg-[#6b4cff] text-white text-xs font-bold px-2 py-0.5 rounded-full'}>
+                {wishlistCount}
+              </span>
             )}
           </button>
         </nav>
 
-        <div className="pt-6 border-t border-subtle space-y-2 shrink-0">
+        <div className={`pt-6 border-t border-subtle space-y-2 shrink-0 ${isDesktopSidebarCollapsed ? 'w-full' : ''}`}>
           <button 
             onClick={() => handleNavigate('help')}
-            className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-medium transition-colors ${activeTab === 'help' ? 'bg-[#6b4cff]/10 text-[#6b4cff]' : 'text-muted hover:bg-hover hover:text-white'}`}
+            className={`w-full flex items-center space-x-3 py-3 rounded-xl font-medium transition-colors ${activeTab === 'help' ? 'bg-[#6b4cff]/10 text-[#6b4cff]' : 'text-muted hover:bg-hover hover:text-white'} ${isDesktopSidebarCollapsed ? 'justify-center px-0' : 'px-4'}`}
           >
-            <HelpCircle className="w-5 h-5" />
-            <span>Help & Support</span>
+            <HelpCircle className="w-5 h-5 shrink-0" />
+            <span className={isDesktopSidebarCollapsed ? 'lg:hidden' : 'block'}>Help & Support</span>
           </button>
         </div>
       </div>
@@ -230,8 +251,32 @@ export default function CustomerDashboard() {
       {/* Main Content */}
       <div className="flex-1 flex flex-col h-full overflow-hidden min-w-0">
         {/* Global Top Header */}
-        <div className="h-16 w-full flex justify-end items-center px-8 shrink-0 border-b border-subtle bg-surface-alt/50 backdrop-blur-md">
+        <div className="h-16 w-full flex justify-between items-center px-4 lg:px-8 shrink-0 border-b border-subtle bg-surface-alt/50 backdrop-blur-md">
+          {/* Header Left (Hamburger & Title) */}
           <div className="flex items-center space-x-3">
+            {/* Mobile Hamburger */}
+            <button
+              className="p-2 lg:hidden text-muted hover:text-main transition-colors rounded-lg hover:bg-hover"
+              onClick={() => setIsSidebarOpen(true)}
+            >
+              <Menu className="w-6 h-6" />
+            </button>
+            {/* Desktop Hamburger */}
+            <button
+              className="p-2 hidden lg:block text-muted hover:text-main transition-colors rounded-lg hover:bg-hover"
+              onClick={() => setIsDesktopSidebarCollapsed(!isDesktopSidebarCollapsed)}
+            >
+              <Menu className="w-6 h-6" />
+            </button>
+            
+            {/* Title - Visible on mobile, or on desktop only when sidebar is collapsed */}
+            <div className={`flex items-center space-x-1 ${isDesktopSidebarCollapsed ? 'lg:flex' : 'lg:hidden'}`}>
+              <h2 className="text-sm font-bold text-main tracking-wide leading-tight">Customer</h2>
+              <h2 className="text-sm font-bold text-[#6b4cff] tracking-wide leading-tight">Portal</h2>
+            </div>
+          </div>
+
+          <div className="flex items-center space-x-2 sm:space-x-3">
             {/* Theme Toggle */}
             <button 
               onClick={toggleTheme} 

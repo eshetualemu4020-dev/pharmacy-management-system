@@ -136,6 +136,7 @@ const CustomerPrescriptionUploadTab: React.FC<CustomerPrescriptionUploadTabProps
       {/* Header */}
       <div className="flex items-center gap-4">
         <button
+          type="button"
           onClick={() => onNavigate('prescriptions')}
           className="p-2 hover:bg-hover text-gray-400 hover:text-main rounded-lg transition-colors"
         >
@@ -182,6 +183,7 @@ const CustomerPrescriptionUploadTab: React.FC<CustomerPrescriptionUploadTabProps
               {orders.map((order) => (
                 <label 
                   key={order.id} 
+                  onClick={() => setSelectedOrderId(order.id.toString())}
                   className={`flex items-start gap-4 p-4 rounded-lg border cursor-pointer transition-all ${
                     selectedOrderId === order.id.toString() 
                       ? 'bg-[#6b4cff]/10 border-[#6b4cff] shadow-sm' 
@@ -217,22 +219,21 @@ const CustomerPrescriptionUploadTab: React.FC<CustomerPrescriptionUploadTabProps
           
           <div className="space-y-4">
             {!file ? (
-              <div 
-                className="border-2 border-dashed border-subtle-hover rounded-xl p-10 text-center hover:bg-white/[0.02] hover:border-[#6b4cff]/50 transition-all cursor-pointer group"
-                onClick={() => fileInputRef.current?.click()}
+              <label 
+                htmlFor="prescription-upload-input"
+                className="border-2 border-dashed border-subtle-hover rounded-xl p-10 text-center hover:bg-white/[0.02] hover:border-[#6b4cff]/50 transition-all cursor-pointer group block"
               >
                 <div className="w-16 h-16 bg-hover rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
                   <UploadCloud className="w-8 h-8 text-[#6b4cff]" />
                 </div>
                 <p className="text-main font-medium mb-1">Click to browse or drag and drop</p>
                 <p className="text-sm text-gray-500 mb-4">Supported formats: JPG, PNG, PDF (Max 5MB)</p>
-                <button
-                  type="button"
-                  className="bg-white/10 text-white px-5 py-2 rounded-lg font-medium border border-subtle group-hover:border-subtle-hover transition-all"
+                <div
+                  className="bg-white/10 text-white px-5 py-2 rounded-lg font-medium border border-subtle group-hover:border-subtle-hover transition-all inline-block"
                 >
                   Select File
-                </button>
-              </div>
+                </div>
+              </label>
             ) : (
               <div className="bg-black/30 border border-subtle-hover rounded-xl p-6 flex items-center justify-between">
                 <div className="flex items-center gap-4 overflow-hidden">
@@ -256,6 +257,7 @@ const CustomerPrescriptionUploadTab: React.FC<CustomerPrescriptionUploadTabProps
             )}
             
             <input
+              id="prescription-upload-input"
               type="file"
               ref={fileInputRef}
               onChange={handleFileChange}
@@ -273,11 +275,10 @@ const CustomerPrescriptionUploadTab: React.FC<CustomerPrescriptionUploadTabProps
           </div>
         </div>
 
-        {/* Submit Action */}
         <div className="flex justify-end pt-4 border-t border-subtle">
           <button
             type="submit"
-            disabled={!selectedOrderId || !file || isSubmitting}
+            disabled={isSubmitting}
             className="bg-[#6b4cff] hover:bg-[#5839e0] text-white px-8 py-3 rounded-xl transition-all font-medium disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-[#6b4cff]/20 flex items-center gap-2"
           >
             {isSubmitting ? (

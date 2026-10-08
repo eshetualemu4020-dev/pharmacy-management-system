@@ -3,7 +3,7 @@ import {
   Users, LayoutDashboard, Settings, Plus, Activity,
   Grid, Pill, Package, Truck, ShoppingCart,
   TrendingUp, ShoppingBag, FileText, Tag, BarChart, BarChart3, LogOut,
-  Search, Filter, Edit, Eye, ShieldAlert, Key, CheckCircle, XCircle, Bell, Moon, Sun
+  Search, Filter, Edit, Eye, ShieldAlert, Key, CheckCircle, XCircle, Bell, Moon, Sun, Menu, ChevronDown, ChevronRight, X
 } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { userApi, dashboardApi } from '../../services/api';
@@ -30,6 +30,8 @@ export default function AdminDashboard() {
   const { theme, toggleTheme } = useTheme();
   const [activeTab, setActiveTab] = useState<'dashboard' | 'users' | 'categories' | 'drugs' | 'inventory-batches' | 'inventory-low-stock' | 'inventory-expiring' | 'inventory-expired' | 'suppliers' | 'purchase-orders' | 'sales' | 'orders' | 'prescriptions' | 'promotions' | 'reports' | 'audit-logs' | 'settings' | 'profile'>('dashboard');
   const [isInventoryMenuOpen, setIsInventoryMenuOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isDesktopSidebarCollapsed, setIsDesktopSidebarCollapsed] = useState(false);
 
   // Filters & Search
   const [searchTerm, setSearchTerm] = useState('');
@@ -152,51 +154,70 @@ export default function AdminDashboard() {
   };
 
   return (
-    <div className="h-screen overflow-hidden bg-base flex">
+    <div className="h-screen w-full bg-base text-main flex font-sans">
+      {/* Sidebar Overlay (Mobile) */}
+      {isSidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden transition-opacity"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+
       {/* Sidebar */}
-      <div className="w-64 shrink-0 bg-surface border-r border-subtle flex flex-col p-4 h-full">
-        <div className="flex items-center space-x-3 mb-6 px-2 shrink-0">
-          <div className="w-9 h-9 bg-gradient-to-br from-[#9b51e0] to-[#7a39b7] rounded-xl flex items-center justify-center">
-            <LayoutDashboard className="w-4 h-4 text-main" />
+      <div className={`fixed lg:relative inset-y-0 left-0 z-50 shrink-0 bg-surface border-r border-subtle flex flex-col h-full transition-all duration-300 ease-in-out ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0 ${isDesktopSidebarCollapsed ? 'w-64 lg:w-20 p-6 lg:px-4 lg:py-6 lg:items-center' : 'w-64 p-4'}`}>
+        <div className={`flex items-center justify-between mb-6 px-2 shrink-0 ${isDesktopSidebarCollapsed ? 'lg:justify-center lg:px-0' : 'w-full'}`}>
+          <div className="flex items-center space-x-3">
+            <div className="w-9 h-9 shrink-0 bg-gradient-to-br from-[#9b51e0] to-[#7a39b7] rounded-xl flex items-center justify-center">
+              <LayoutDashboard className="w-4 h-4 text-white" />
+            </div>
+            <h2 className={`text-xl font-bold text-main tracking-wide ${isDesktopSidebarCollapsed ? 'lg:hidden' : 'block'}`}>RxAdmin</h2>
           </div>
-          <h2 className="text-xl font-bold text-main tracking-wide">RxAdmin</h2>
+          <button 
+            className="p-1 lg:hidden text-muted hover:text-main rounded-lg hover:bg-hover transition-colors"
+            onClick={() => setIsSidebarOpen(false)}
+          >
+            <X className="w-5 h-5" />
+          </button>
         </div>
 
-        <nav className="space-y-0.5 flex-1 overflow-y-auto pr-2 pb-2 custom-scrollbar">
+        <nav className={`space-y-0.5 flex-1 overflow-y-auto pb-2 custom-scrollbar ${isDesktopSidebarCollapsed ? 'w-full' : 'pr-2'}`}>
           <button
             onClick={() => setActiveTab('dashboard')}
-            className={`w-full flex items-center space-x-3 px-3 py-2 rounded-xl text-sm font-medium transition-colors ${activeTab === 'dashboard' ? 'bg-[#9b51e0]/10 text-[#9b51e0]' : 'text-muted hover:bg-hover hover:text-white'}`}
+            className={`w-full flex items-center space-x-3 py-2 rounded-xl text-sm font-medium transition-colors ${activeTab === 'dashboard' ? 'bg-[#9b51e0]/10 text-[#9b51e0]' : 'text-muted hover:bg-hover hover:text-white'} ${isDesktopSidebarCollapsed ? 'justify-center px-0' : 'px-3'}`}
           >
-            <LayoutDashboard className="w-5 h-5" />
-            <span>Dashboard</span>
+            <LayoutDashboard className="w-5 h-5 shrink-0" />
+            <span className={isDesktopSidebarCollapsed ? 'lg:hidden' : 'block'}>Dashboard</span>
           </button>
           <button
             onClick={() => setActiveTab('users')}
-            className={`w-full flex items-center space-x-3 px-3 py-2 rounded-xl text-sm font-medium transition-colors ${activeTab === 'users' ? 'bg-[#9b51e0]/10 text-[#9b51e0]' : 'text-muted hover:bg-hover hover:text-white'}`}
+            className={`w-full flex items-center space-x-3 py-2 rounded-xl text-sm font-medium transition-colors ${activeTab === 'users' ? 'bg-[#9b51e0]/10 text-[#9b51e0]' : 'text-muted hover:bg-hover hover:text-white'} ${isDesktopSidebarCollapsed ? 'justify-center px-0' : 'px-3'}`}
           >
-            <Users className="w-5 h-5" />
-            <span>Users</span>
+            <Users className="w-5 h-5 shrink-0" />
+            <span className={isDesktopSidebarCollapsed ? 'lg:hidden' : 'block'}>Users</span>
           </button>
           <button
             onClick={() => setActiveTab('categories')}
-            className={`w-full flex items-center space-x-3 px-3 py-2 rounded-xl text-sm font-medium transition-colors ${activeTab === 'categories' ? 'bg-[#9b51e0]/10 text-[#9b51e0]' : 'text-muted hover:bg-hover hover:text-white'}`}
+            className={`w-full flex items-center space-x-3 py-2 rounded-xl text-sm font-medium transition-colors ${activeTab === 'categories' ? 'bg-[#9b51e0]/10 text-[#9b51e0]' : 'text-muted hover:bg-hover hover:text-white'} ${isDesktopSidebarCollapsed ? 'justify-center px-0' : 'px-3'}`}
           >
-            <Grid className="w-5 h-5" />
-            <span>Categories</span>
+            <Grid className="w-5 h-5 shrink-0" />
+            <span className={isDesktopSidebarCollapsed ? 'lg:hidden' : 'block'}>Categories</span>
           </button>
           <div>
             <button
-              onClick={() => setIsInventoryMenuOpen(!isInventoryMenuOpen)}
-              className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-sm font-medium transition-colors ${['drugs', 'inventory-batches', 'inventory-low-stock', 'inventory-expiring', 'inventory-expired'].includes(activeTab) ? 'bg-[#9b51e0]/10 text-[#9b51e0]' : 'text-muted hover:bg-hover hover:text-white'}`}
+              onClick={() => {
+                if (isDesktopSidebarCollapsed) setIsDesktopSidebarCollapsed(false);
+                setIsInventoryMenuOpen(!isInventoryMenuOpen);
+              }}
+              className={`w-full flex items-center justify-between py-2 rounded-xl text-sm font-medium transition-colors ${['drugs', 'inventory-batches', 'inventory-low-stock', 'inventory-expiring', 'inventory-expired'].includes(activeTab) ? 'bg-[#9b51e0]/10 text-[#9b51e0]' : 'text-muted hover:bg-hover hover:text-white'} ${isDesktopSidebarCollapsed ? 'justify-center px-0' : 'px-3'}`}
             >
               <div className="flex items-center space-x-3">
-                <Package className="w-5 h-5" />
-                <span>Inventory</span>
+                <Package className="w-5 h-5 shrink-0" />
+                <span className={isDesktopSidebarCollapsed ? 'lg:hidden' : 'block'}>Inventory</span>
               </div>
-              <span className="text-xs">{isInventoryMenuOpen ? '▼' : '▶'}</span>
+              {!isDesktopSidebarCollapsed && (isInventoryMenuOpen ? <ChevronDown className="w-4 h-4 shrink-0" /> : <ChevronRight className="w-4 h-4 shrink-0" />)}
             </button>
 
-            {isInventoryMenuOpen && (
+            {isInventoryMenuOpen && !isDesktopSidebarCollapsed && (
               <div className="pl-11 pr-3 mt-1 space-y-1 mb-2">
                 <button
                   onClick={() => setActiveTab('drugs')}
@@ -233,70 +254,70 @@ export default function AdminDashboard() {
           </div>
           <button
             onClick={() => setActiveTab('suppliers')}
-            className={`w-full flex items-center space-x-3 px-3 py-2 rounded-xl text-sm font-medium transition-colors ${activeTab === 'suppliers' ? 'bg-[#9b51e0] text-white shadow-lg shadow-[#9b51e0]/20' : 'text-muted hover:bg-hover hover:text-white'}`}
+            className={`w-full flex items-center space-x-3 py-2 rounded-xl text-sm font-medium transition-colors ${activeTab === 'suppliers' ? 'bg-[#9b51e0] text-white shadow-lg shadow-[#9b51e0]/20' : 'text-muted hover:bg-hover hover:text-white'} ${isDesktopSidebarCollapsed ? 'justify-center px-0' : 'px-3'}`}
           >
-            <Truck className="w-5 h-5" />
-            <span>Suppliers</span>
+            <Truck className="w-5 h-5 shrink-0" />
+            <span className={isDesktopSidebarCollapsed ? 'lg:hidden' : 'block'}>Suppliers</span>
           </button>
           <button
             onClick={() => setActiveTab('purchase-orders')}
-            className={`w-full flex items-center space-x-3 px-3 py-2 rounded-xl text-sm font-medium transition-colors ${activeTab === 'purchase-orders' ? 'bg-[#9b51e0] text-white shadow-lg shadow-[#9b51e0]/20' : 'text-muted hover:bg-hover hover:text-white'}`}
+            className={`w-full flex items-center space-x-3 py-2 rounded-xl text-sm font-medium transition-colors ${activeTab === 'purchase-orders' ? 'bg-[#9b51e0] text-white shadow-lg shadow-[#9b51e0]/20' : 'text-muted hover:bg-hover hover:text-white'} ${isDesktopSidebarCollapsed ? 'justify-center px-0' : 'px-3'}`}
           >
-            <ShoppingCart className="w-5 h-5" />
-            <span>Purchase Orders</span>
+            <ShoppingCart className="w-5 h-5 shrink-0" />
+            <span className={isDesktopSidebarCollapsed ? 'lg:hidden' : 'block'}>Purchase Orders</span>
           </button>
           <button
             onClick={() => setActiveTab('sales')}
-            className={`w-full flex items-center space-x-3 px-3 py-2 rounded-xl text-sm font-medium transition-colors ${activeTab === 'sales' ? 'bg-[#9b51e0] text-white shadow-lg shadow-[#9b51e0]/20' : 'text-muted hover:bg-hover hover:text-white'}`}
+            className={`w-full flex items-center space-x-3 py-2 rounded-xl text-sm font-medium transition-colors ${activeTab === 'sales' ? 'bg-[#9b51e0] text-white shadow-lg shadow-[#9b51e0]/20' : 'text-muted hover:bg-hover hover:text-white'} ${isDesktopSidebarCollapsed ? 'justify-center px-0' : 'px-3'}`}
           >
-            <TrendingUp className="w-5 h-5" />
-            <span>Sales</span>
+            <TrendingUp className="w-5 h-5 shrink-0" />
+            <span className={isDesktopSidebarCollapsed ? 'lg:hidden' : 'block'}>Sales</span>
           </button>
           <button
             onClick={() => setActiveTab('orders')}
-            className={`w-full flex items-center space-x-3 px-3 py-2 rounded-xl text-sm font-medium transition-colors ${activeTab === 'orders' ? 'bg-[#9b51e0] text-white shadow-lg shadow-[#9b51e0]/20' : 'text-muted hover:bg-hover hover:text-white'}`}
+            className={`w-full flex items-center space-x-3 py-2 rounded-xl text-sm font-medium transition-colors ${activeTab === 'orders' ? 'bg-[#9b51e0] text-white shadow-lg shadow-[#9b51e0]/20' : 'text-muted hover:bg-hover hover:text-white'} ${isDesktopSidebarCollapsed ? 'justify-center px-0' : 'px-3'}`}
           >
-            <ShoppingBag className="w-5 h-5" />
-            <span>Orders</span>
+            <ShoppingBag className="w-5 h-5 shrink-0" />
+            <span className={isDesktopSidebarCollapsed ? 'lg:hidden' : 'block'}>Orders</span>
           </button>
           <button
             onClick={() => setActiveTab('prescriptions')}
-            className={`w-full flex items-center space-x-3 px-3 py-2 rounded-xl text-sm font-medium transition-colors ${activeTab === 'prescriptions' ? 'bg-[#9b51e0] text-white shadow-lg shadow-[#9b51e0]/20' : 'text-muted hover:bg-hover hover:text-white'}`}
+            className={`w-full flex items-center space-x-3 py-2 rounded-xl text-sm font-medium transition-colors ${activeTab === 'prescriptions' ? 'bg-[#9b51e0] text-white shadow-lg shadow-[#9b51e0]/20' : 'text-muted hover:bg-hover hover:text-white'} ${isDesktopSidebarCollapsed ? 'justify-center px-0' : 'px-3'}`}
           >
-            <FileText className="w-5 h-5" />
-            <span>Prescriptions</span>
+            <FileText className="w-5 h-5 shrink-0" />
+            <span className={isDesktopSidebarCollapsed ? 'lg:hidden' : 'block'}>Prescriptions</span>
           </button>
           <button
             onClick={() => setActiveTab('promotions')}
-            className={`w-full flex items-center space-x-3 px-3 py-2 rounded-xl text-sm font-medium transition-colors ${activeTab === 'promotions' ? 'bg-[#9b51e0] text-white shadow-lg shadow-[#9b51e0]/20' : 'text-muted hover:bg-hover hover:text-white'}`}
+            className={`w-full flex items-center space-x-3 py-2 rounded-xl text-sm font-medium transition-colors ${activeTab === 'promotions' ? 'bg-[#9b51e0] text-white shadow-lg shadow-[#9b51e0]/20' : 'text-muted hover:bg-hover hover:text-white'} ${isDesktopSidebarCollapsed ? 'justify-center px-0' : 'px-3'}`}
           >
-            <Tag className="w-5 h-5" />
-            <span>Promotions</span>
+            <Tag className="w-5 h-5 shrink-0" />
+            <span className={isDesktopSidebarCollapsed ? 'lg:hidden' : 'block'}>Promotions</span>
           </button>
 
           <button
             onClick={() => setActiveTab('reports')}
-            className={`w-full flex items-center space-x-3 px-3 py-2 rounded-xl text-sm font-medium transition-colors ${activeTab === 'reports' ? 'bg-[#9b51e0] text-white shadow-lg shadow-[#9b51e0]/20' : 'text-muted hover:bg-hover hover:text-white'}`}
+            className={`w-full flex items-center space-x-3 py-2 rounded-xl text-sm font-medium transition-colors ${activeTab === 'reports' ? 'bg-[#9b51e0] text-white shadow-lg shadow-[#9b51e0]/20' : 'text-muted hover:bg-hover hover:text-white'} ${isDesktopSidebarCollapsed ? 'justify-center px-0' : 'px-3'}`}
           >
-            <BarChart3 className="w-5 h-5" />
-            <span>Reports & Analytics</span>
+            <BarChart3 className="w-5 h-5 shrink-0" />
+            <span className={isDesktopSidebarCollapsed ? 'lg:hidden' : 'block'}>Reports & Analytics</span>
           </button>
           <button
             onClick={() => setActiveTab('audit-logs')}
-            className={`w-full flex items-center space-x-3 px-3 py-2 rounded-xl text-sm font-medium transition-colors ${activeTab === 'audit-logs' ? 'bg-[#9b51e0] text-white shadow-lg shadow-[#9b51e0]/20' : 'text-muted hover:bg-hover hover:text-white'}`}
+            className={`w-full flex items-center space-x-3 py-2 rounded-xl text-sm font-medium transition-colors ${activeTab === 'audit-logs' ? 'bg-[#9b51e0] text-white shadow-lg shadow-[#9b51e0]/20' : 'text-muted hover:bg-hover hover:text-white'} ${isDesktopSidebarCollapsed ? 'justify-center px-0' : 'px-3'}`}
           >
-            <Activity className="w-5 h-5" />
-            <span>Audit Logs</span>
+            <Activity className="w-5 h-5 shrink-0" />
+            <span className={isDesktopSidebarCollapsed ? 'lg:hidden' : 'block'}>Audit Logs</span>
           </button>
         </nav>
 
-        <div className="pt-4 border-t border-subtle space-y-1 shrink-0">
+        <div className={`pt-4 border-t border-subtle space-y-1 shrink-0 ${isDesktopSidebarCollapsed ? 'w-full' : ''}`}>
           <button
             onClick={() => setActiveTab('settings')}
-            className={`w-full flex items-center space-x-3 px-3 py-2 rounded-xl text-sm font-medium transition-colors ${activeTab === 'settings' ? 'bg-[#9b51e0] text-white shadow-lg shadow-[#9b51e0]/20' : 'text-muted hover:bg-hover hover:text-white'}`}
+            className={`w-full flex items-center space-x-3 py-2 rounded-xl text-sm font-medium transition-colors ${activeTab === 'settings' ? 'bg-[#9b51e0] text-white shadow-lg shadow-[#9b51e0]/20' : 'text-muted hover:bg-hover hover:text-white'} ${isDesktopSidebarCollapsed ? 'justify-center px-0' : 'px-3'}`}
           >
-            <Settings className="w-5 h-5" />
-            <span>Settings</span>
+            <Settings className="w-5 h-5 shrink-0" />
+            <span className={isDesktopSidebarCollapsed ? 'lg:hidden' : 'block'}>Settings</span>
           </button>
         </div>
       </div>
@@ -305,7 +326,30 @@ export default function AdminDashboard() {
       <div className="flex-1 flex flex-col h-full overflow-hidden bg-base min-w-0">
 
         {/* Global Top Header */}
-        <div className="h-16 w-full flex justify-end items-center px-8 shrink-0 border-b border-subtle bg-base/50 backdrop-blur-md">
+        <div className="h-16 w-full flex justify-between items-center px-4 lg:px-8 shrink-0 border-b border-subtle bg-base/50 backdrop-blur-md">
+          {/* Header Left (Hamburger & Title) */}
+          <div className="flex items-center space-x-3">
+            {/* Mobile Hamburger */}
+            <button
+              className="p-2 lg:hidden text-muted hover:text-main transition-colors rounded-lg hover:bg-hover"
+              onClick={() => setIsSidebarOpen(true)}
+            >
+              <Menu className="w-6 h-6" />
+            </button>
+            {/* Desktop Hamburger */}
+            <button
+              className="p-2 hidden lg:block text-muted hover:text-main transition-colors rounded-lg hover:bg-hover"
+              onClick={() => setIsDesktopSidebarCollapsed(!isDesktopSidebarCollapsed)}
+            >
+              <Menu className="w-6 h-6" />
+            </button>
+            
+            {/* Title - Visible on mobile, or on desktop only when sidebar is collapsed */}
+            <div className={`flex items-center space-x-1 ${isDesktopSidebarCollapsed ? 'lg:flex' : 'lg:hidden'}`}>
+              <h2 className="text-xl font-bold text-main tracking-wide">RxAdmin</h2>
+            </div>
+          </div>
+          
           <div className="flex items-center space-x-3">
             {/* Theme Toggle */}
             <button 

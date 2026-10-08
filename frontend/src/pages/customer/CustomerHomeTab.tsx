@@ -83,32 +83,32 @@ export default function CustomerHomeTab({ onNavigate }: CustomerHomeTabProps) {
   }
 
   return (
-    <div className="space-y-10 p-10 pb-20">
+    <div className="space-y-6 md:space-y-10 p-4 md:p-10 pb-20">
       {/* Hero Section */}
-      <div className="relative bg-gradient-to-r from-surface to-base rounded-3xl p-10 border border-subtle overflow-hidden">
+      <div className="relative bg-gradient-to-r from-surface to-base rounded-3xl p-6 md:p-10 border border-subtle overflow-hidden">
         <div className="absolute top-0 right-0 w-64 h-64 bg-[#f43f5e]/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
         <div className="absolute bottom-0 left-0 w-64 h-64 bg-[#3b82f6]/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2"></div>
         
         <div className="relative z-10 max-w-2xl">
-          <h1 className="text-4xl font-bold text-main mb-4">
+          <h1 className="text-3xl md:text-4xl font-bold text-main mb-4">
             Hello, {userName}! <br/> Your Health, Our Priority
           </h1>
-          <p className="text-muted text-lg mb-8">
+          <p className="text-muted text-base md:text-lg mb-8">
             Find trusted medicines, healthcare products, and upload your prescriptions easily.
           </p>
           
-          <form onSubmit={handleSearch} className="flex gap-2">
+          <form onSubmit={handleSearch} className="flex flex-col sm:flex-row gap-3">
             <div className="relative flex-1">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted" />
               <input
                 type="text"
-                placeholder="Search by drug name, generic name, or brand..."
+                placeholder="Search by drug name..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full bg-base border border-subtle-hover rounded-xl py-4 pl-12 pr-4 text-main placeholder:text-muted focus:outline-none focus:border-[#f43f5e]/50 focus:ring-1 focus:ring-[#f43f5e]/50 transition-all"
+                className="w-full bg-base border border-subtle-hover rounded-xl py-3 md:py-4 pl-12 pr-4 text-main placeholder:text-muted focus:outline-none focus:border-[#f43f5e]/50 focus:ring-1 focus:ring-[#f43f5e]/50 transition-all"
               />
             </div>
-            <button type="submit" className="px-8 py-4 bg-[#f43f5e] hover:bg-[#e11d48] text-white rounded-xl font-medium transition-colors">
+            <button type="submit" className="px-6 md:px-8 py-3 md:py-4 bg-[#f43f5e] hover:bg-[#e11d48] text-white rounded-xl font-medium transition-colors w-full sm:w-auto">
               Search
             </button>
             {searchResults && (
@@ -231,14 +231,14 @@ export default function CustomerHomeTab({ onNavigate }: CustomerHomeTabProps) {
       )}
 
       {/* Prescription Service Callout */}
-      <section className="bg-surface rounded-3xl p-10 border border-[#3b82f6]/30 flex flex-col md:flex-row items-center justify-between gap-8">
+      <section className="bg-surface rounded-3xl p-6 md:p-10 border border-[#3b82f6]/30 flex flex-col md:flex-row items-center justify-between gap-6 md:gap-8 text-center md:text-left">
         <div>
-          <h2 className="text-3xl font-bold text-main mb-4">Have a Prescription?</h2>
-          <p className="text-muted max-w-xl text-lg">
+          <h2 className="text-2xl md:text-3xl font-bold text-main mb-3 md:mb-4">Have a Prescription?</h2>
+          <p className="text-muted max-w-xl text-base md:text-lg">
             Upload your prescription for Rx-only medicines. Our pharmacists will review and approve it shortly.
           </p>
         </div>
-        <button className="px-8 py-4 bg-[#3b82f6] hover:bg-[#2563eb] text-white rounded-xl font-bold transition-colors flex items-center space-x-2 shrink-0 shadow-lg shadow-[#3b82f6]/20">
+        <button className="px-6 md:px-8 py-3 md:py-4 bg-[#3b82f6] hover:bg-[#2563eb] text-white rounded-xl font-bold transition-colors flex items-center space-x-2 shrink-0 shadow-lg shadow-[#3b82f6]/20">
           <FileText className="w-5 h-5" />
           <span>Upload Prescription</span>
         </button>

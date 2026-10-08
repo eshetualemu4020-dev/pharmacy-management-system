@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Search, ShoppingCart, Plus, Minus, Trash2, Check, AlertTriangle, Pill, User } from 'lucide-react';
+import { Search, ShoppingCart, Plus, Minus, Trash2, Check, AlertTriangle, Pill, User, FileText, X } from 'lucide-react';
 import { inventoryApi, salesApi, customerApi, promotionApi } from '../../services/api';
+import { formatCurrency, EXCHANGE_RATE_ETB } from '../../utils/currency';
 import ReceiptModal from '../../components/ReceiptModal';
 
 export default function PharmacistPOSTab({ navigationContext }: { navigationContext?: any }) {
@@ -16,6 +17,7 @@ export default function PharmacistPOSTab({ navigationContext }: { navigationCont
   const [selectedCustomer, setSelectedCustomer] = useState<string>('');
   const [selectedPromotion, setSelectedPromotion] = useState<string>('');
   const [paymentMethod, setPaymentMethod] = useState<'cash' | 'card'>('cash');
+  const [paymentCurrency, setPaymentCurrency] = useState<'USD' | 'ETB'>('USD');
   const [amountPaid, setAmountPaid] = useState<number | ''>('');
   const [isProcessing, setIsProcessing] = useState(false);
   
@@ -164,8 +166,8 @@ export default function PharmacistPOSTab({ navigationContext }: { navigationCont
         discount: discountAmount,
         total_amount: total,
         payment_method: paymentMethod,
-        amount_paid: amountPaid ? Number(amountPaid) : total,
-        change: amountPaid ? Math.max(0, Number(amountPaid) - total) : 0
+        amount_paid: amountPaid ? (paymentCurrency === 'ETB' ? Number(amountPaid) / EXCHANGE_RATE_ETB : Number(amountPaid)) : total,
+        change: amountPaid ? Math.max(0, (paymentCurrency === 'ETB' ? Number(amountPaid) / EXCHANGE_RATE_ETB : Number(amountPaid)) - total) : 0
       };
 
       setCompletedSale(saleDetails);
@@ -230,7 +232,7 @@ export default function PharmacistPOSTab({ navigationContext }: { navigationCont
                       <Pill className="w-5 h-5" />
                     </div>
                     <div className="text-right">
-                      <div className="text-lg font-bold text-main">${Number(drug.price).toFixed(2)}</div>
+                      <div className="text-lg font-bold text-main">{formatCurrency(drug.price)}</div>
                       <div className="text-xs text-muted">Available: {drug.total_stock}</div>
                     </div>
                   </div>
@@ -284,10 +286,10 @@ export default function PharmacistPOSTab({ navigationContext }: { navigationCont
                 <div className="flex justify-between items-start mb-3">
                   <div>
                     <div className="font-semibold text-main text-sm">{item.name}</div>
-                    <div className="text-xs text-muted">${Number(item.price).toFixed(2)} each</div>
+                    <div className="text-xs text-muted">{formatCurrency(item.price)} each</div>
                   </div>
                   <div className="text-right font-bold text-main text-sm">
-                    ${(item.price * item.quantity).toFixed(2)}
+                    {formatCurrency(item.price * item.quantity)}
                   </div>
                 </div>
 
@@ -359,7 +361,7 @@ export default function PharmacistPOSTab({ navigationContext }: { navigationCont
                 >
                   <option value="">No Promotion</option>
                   {promotions.map(p => (
-                    <option key={p.id} value={p.id}>{p.name} (-{p.discount_type === 'percentage' ? `${p.discount_value}%` : `$${p.discount_value}`})</option>
+                    <option key={p.id} value={p.id}>{p.name} (-{p.discount_type === 'percentage' ? `${p.discount_value}%` : formatCurrency(p.discount_value)})</option>
                   ))}
                 </select>
               </div>
@@ -389,50 +391,59 @@ export default function PharmacistPOSTab({ navigationContext }: { navigationCont
             </div>
             
             {paymentMethod === 'cash' && cart.length > 0 && (
-              <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted text-sm">$</span>
-                <input 
-                  type="number"
-                  placeholder="Amount Paid"
-                  value={amountPaid}
-                  onChange={(e) => setAmountPaid(e.target.value ? Number(e.target.value) : '')}
-                  className="w-full bg-base border border-subtle-hover text-main rounded-xl pl-7 pr-3 py-2 text-sm focus:outline-none focus:border-[#10b981]"
-                />
+              <div className="flex space-x-2">
+                <select
+                  value={paymentCurrency}
+                  onChange={(e) => setPaymentCurrency(e.target.value as 'USD' | 'ETB')}
+                  className="bg-base border border-subtle-hover text-main rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-[#10b981]"
+                >
+                  <option value="USD">USD</option>
+                  <option value="ETB">ETB</option>
+                </select>
+                <div className="relative flex-1">
+                  <input 
+                    type="number"
+                    placeholder="Amount Paid"
+                    value={amountPaid}
+                    onChange={(e) => setAmountPaid(e.target.value ? Number(e.target.value) : '')}
+                    className="w-full bg-base border border-subtle-hover text-main rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-[#10b981]"
+                  />
+                </div>
               </div>
             )}
           </div>
 
           <div className="space-y-2 mb-6">
-            <div className="flex justify-between text-sm text-muted">
-              <span>Subtotal</span>
-              <span>${subtotal.toFixed(2)}</span>
-            </div>
-            {discountAmount > 0 && (
-              <div className="flex justify-between text-sm text-[#10b981]">
+              <div className="flex justify-between items-center text-muted mb-2">
+                <span>Subtotal</span>
+                <span>{formatCurrency(subtotal)}</span>
+              </div>
+              
+              <div className="flex justify-between items-center text-red-400 mb-4">
                 <span>Discount</span>
-                <span>-${discountAmount.toFixed(2)}</span>
+                <span>-{formatCurrency(discountAmount)}</span>
               </div>
-            )}
-            <div className="flex justify-between text-2xl font-bold text-main pt-2 border-t border-subtle">
-              <span>Total</span>
-              <span>${total.toFixed(2)}</span>
-            </div>
-            
-            {paymentMethod === 'cash' && amountPaid !== '' && Number(amountPaid) >= total && (
-              <div className="flex justify-between text-sm text-yellow-400 pt-1">
-                <span>Change Due</span>
-                <span>${(Number(amountPaid) - total).toFixed(2)}</span>
+              
+              <div className="flex justify-between items-center text-xl font-bold text-main mb-6">
+                <span>Total</span>
+                <span>{formatCurrency(total)}</span>
               </div>
-            )}
+              
+              {paymentMethod === 'cash' && amountPaid !== '' && (
+                <div className="flex justify-between items-center text-[#10b981] mb-6 pt-4 border-t border-subtle border-dashed">
+                  <span>Change</span>
+                  <span>{formatCurrency(Math.max(0, (paymentCurrency === 'ETB' ? Number(amountPaid) / EXCHANGE_RATE_ETB : Number(amountPaid)) - total))}</span>
+                </div>
+              )}
           </div>
 
           <button 
             onClick={handleCheckout}
-            disabled={cart.length === 0 || isProcessing || (paymentMethod === 'cash' && amountPaid !== '' && Number(amountPaid) < total)}
+            disabled={cart.length === 0 || isProcessing || (paymentMethod === 'cash' && amountPaid !== '' && (paymentCurrency === 'ETB' ? Number(amountPaid) / EXCHANGE_RATE_ETB : Number(amountPaid)) < total)}
             className={`w-full py-4 rounded-xl font-bold text-main shadow-lg transition-all flex items-center justify-center gap-2 ${
-              cart.length === 0 || isProcessing || (paymentMethod === 'cash' && amountPaid !== '' && Number(amountPaid) < total)
+              cart.length === 0 || isProcessing || (paymentMethod === 'cash' && amountPaid !== '' && (paymentCurrency === 'ETB' ? Number(amountPaid) / EXCHANGE_RATE_ETB : Number(amountPaid)) < total)
                 ? 'bg-[#10b981]/50 cursor-not-allowed opacity-70'
-                : 'bg-[#10b981] hover:bg-[#059669] hover:-translate-y-1 hover:shadow-[#10b981]/25'
+                : 'bg-[#10b981] hover:bg-[#059669] hover:scale-[1.02]'
             }`}
           >
             {isProcessing ? 'Processing...' : (

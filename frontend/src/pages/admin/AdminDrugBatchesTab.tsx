@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { inventoryApi } from '../../services/api';
-import { Search, Layers, AlertCircle, RefreshCw, XCircle, Clock, CheckCircle } from 'lucide-react';
+import { Search, Layers, AlertCircle, RefreshCw, XCircle, Clock, CheckCircle, Plus } from 'lucide-react';
 import AdminDrugDetailsModal from './components/AdminDrugDetailsModal';
+import AdminAddBatchModal from './components/AdminAddBatchModal';
 
 export default function AdminDrugBatchesTab() {
   const [batches, setBatches] = useState<any[]>([]);
@@ -17,6 +18,7 @@ export default function AdminDrugBatchesTab() {
   
   // Selected Drug for details modal
   const [selectedDrug, setSelectedDrug] = useState<any>(null);
+  const [isAddBatchModalOpen, setIsAddBatchModalOpen] = useState(false);
 
   // Debounce search
   useEffect(() => {
@@ -77,13 +79,24 @@ export default function AdminDrugBatchesTab() {
           </h2>
           <p className="text-muted mt-1">Manage and track all pharmaceutical drug batches.</p>
         </div>
-        <button 
-          onClick={fetchBatches}
-          className="flex items-center gap-2 px-4 py-2 bg-hover hover:bg-white/10 text-white rounded-xl transition-colors border border-subtle-hover"
-        >
-          <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-          Refresh
-        </button>
+        <div className="flex items-center gap-3">
+          <button 
+            type="button"
+            onClick={fetchBatches}
+            className="flex items-center gap-2 px-4 py-2 bg-hover hover:bg-white/10 text-white rounded-xl transition-colors border border-subtle-hover"
+          >
+            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+            Refresh
+          </button>
+          <button 
+            type="button"
+            onClick={() => setIsAddBatchModalOpen(true)}
+            className="flex items-center gap-2 px-4 py-2 bg-[#3b82f6] hover:bg-[#2563eb] text-white rounded-xl transition-colors font-medium shadow-lg shadow-blue-500/20"
+          >
+            <Plus className="w-4 h-4" />
+            Add Batch
+          </button>
+        </div>
       </div>
 
       <div className="bg-surface rounded-2xl border border-subtle p-6">
@@ -127,7 +140,7 @@ export default function AdminDrugBatchesTab() {
                 <th className="pb-3 font-medium">Drug / Batch</th>
                 <th className="pb-3 font-medium">Mfg Date</th>
                 <th className="pb-3 font-medium">Exp Date</th>
-                <th className="pb-3 font-medium text-right">Qty</th>
+                <th className="pb-3 font-medium text-right pr-4">Qty</th>
                 <th className="pb-3 font-medium">Supplier</th>
                 <th className="pb-3 font-medium">Status</th>
                 <th className="pb-3 font-medium text-right">Actions</th>
@@ -159,8 +172,10 @@ export default function AdminDrugBatchesTab() {
                         <div className="text-xs text-muted mt-1">{batch.batch_number}</div>
                       </td>
                       <td className="py-4 text-muted">{new Date(batch.mfg_date).toLocaleDateString()}</td>
-                      <td className="py-4 text-muted">{new Date(batch.exp_date).toLocaleDateString()}</td>
-                      <td className="py-4 text-right">
+                      <td className="py-4 text-muted">
+                        {new Date(batch.exp_date).toLocaleDateString()}
+                      </td>
+                      <td className="py-4 text-right pr-4">
                         <span className="font-medium text-main">{batch.quantity}</span>
                       </td>
                       <td className="py-4 text-muted">
@@ -216,8 +231,18 @@ export default function AdminDrugBatchesTab() {
 
       {selectedDrug && (
         <AdminDrugDetailsModal 
-          drug={selectedDrug} 
-          onClose={() => setSelectedDrug(null)} 
+          drug={selectedDrug}
+          onClose={() => setSelectedDrug(null)}
+        />
+      )}
+
+      {isAddBatchModalOpen && (
+        <AdminAddBatchModal
+          onClose={() => setIsAddBatchModalOpen(false)}
+          onSuccess={() => {
+            setIsAddBatchModalOpen(false);
+            fetchBatches();
+          }}
         />
       )}
     </div>

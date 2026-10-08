@@ -156,7 +156,7 @@ export default function PurchaseOrdersTab() {
         drug_name: item.drug_name,
         quantity_ordered: item.quantity_ordered,
         quantity_received: item.quantity_ordered - (item.quantity_received || 0),
-        batch_id: '',
+        batch_number: '',
         mfg_date: '',
         exp_date: '',
         retail_price: item.unit_cost * 1.5, // default markup
@@ -206,7 +206,7 @@ export default function PurchaseOrdersTab() {
       if (item.retail_price < 0) {
         return alert(`Retail price cannot be negative for ${item.drug_name}.`);
       }
-      if (item.quantity_received > 0 && !item.batch_id) {
+      if (item.quantity_received > 0 && !item.batch_number) {
         return alert(`Batch ID is required for ${item.drug_name} if receiving any quantity.`);
       }
       if (item.quantity_received > 0 && !item.exp_date) {
@@ -471,7 +471,7 @@ export default function PurchaseOrdersTab() {
                       <div className="w-32">
                         <label className="block text-xs text-muted mb-1">Subtotal</label>
                         <div className="px-3 py-1.5 text-emerald-400 font-medium text-sm">
-                          {((item.quantity || 0) * (item.unit_cost || 0)).toFixed(2)}
+                          {((item.quantity || 0) * (item.unit_cost || 0)).toFixed(2)} {poCurrency}
                         </div>
                       </div>
                       <button type="button" onClick={() => handleCreateRemoveItem(index)} className="p-1.5 text-red-400 hover:bg-red-400/10 rounded-lg mb-0.5">
@@ -483,7 +483,11 @@ export default function PurchaseOrdersTab() {
                 <div className="mt-4 text-right">
                   <span className="text-muted font-medium mr-4">Total Amount:</span>
                   <span className="text-2xl text-emerald-400 font-bold">
-                    {formatCurrency(createForm.items.reduce((acc, item) => acc + ((item.quantity||0) * (item.unit_cost||0)), 0))}
+                    {formatCurrency(
+                      (poCurrency === 'ETB' 
+                        ? createForm.items.reduce((acc, item) => acc + ((item.quantity||0) * (item.unit_cost||0)), 0) / EXCHANGE_RATE_ETB 
+                        : createForm.items.reduce((acc, item) => acc + ((item.quantity||0) * (item.unit_cost||0)), 0))
+                    )}
                   </span>
                 </div>
               </div>
@@ -623,8 +627,8 @@ export default function PurchaseOrdersTab() {
                             <label className="block text-xs font-bold text-muted mb-1">Batch ID *</label>
                             <input 
                               type="text" required
-                              value={item.batch_id} 
-                              onChange={e => handleReceiveItemChange(index, 'batch_id', e.target.value)} 
+                              value={item.batch_number} 
+                              onChange={e => handleReceiveItemChange(index, 'batch_number', e.target.value)} 
                               className="w-full bg-surface border border-subtle rounded-lg px-3 py-2 text-main focus:outline-none focus:border-[#9b51e0]" 
                             />
                           </div>

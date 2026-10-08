@@ -7,6 +7,7 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell 
 } from 'recharts';
 import { reportsApi } from '../../services/api';
+import { formatCurrency } from '../../utils/currency';
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#ffc658'];
 
@@ -124,10 +125,10 @@ const PharmacistReportsTab: React.FC = () => {
     return (
       <div className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          {renderSummaryCard('Total Sales Amount', `$${Number(reportData.summary.total_revenue).toFixed(2)}`, <DollarSign size={20} className="text-emerald-400" />, 'bg-emerald-400/10')}
+          {renderSummaryCard('Total Sales Amount', formatCurrency(reportData.summary.total_revenue), <DollarSign size={20} className="text-emerald-400" />, 'bg-emerald-400/10')}
           {renderSummaryCard('Transactions', reportData.summary.number_of_sales, <ShoppingBag size={20} className="text-blue-400" />, 'bg-blue-400/10')}
-          {renderSummaryCard('Avg Transaction', `$${Number(reportData.summary.average_sale_value).toFixed(2)}`, <TrendingUp size={20} className="text-indigo-400" />, 'bg-indigo-400/10')}
-          {renderSummaryCard('Total Discounts', `$${Number(reportData.summary.total_discounts).toFixed(2)}`, <FileText size={20} className="text-rose-400" />, 'bg-rose-400/10')}
+          {renderSummaryCard('Avg Transaction', formatCurrency(reportData.summary.average_sale_value), <TrendingUp size={20} className="text-indigo-400" />, 'bg-indigo-400/10')}
+          {renderSummaryCard('Total Discounts', formatCurrency(reportData.summary.total_discounts), <FileText size={20} className="text-rose-400" />, 'bg-rose-400/10')}
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -192,7 +193,7 @@ const PharmacistReportsTab: React.FC = () => {
                     </td>
                     <td className="p-4">{med.category_name || 'N/A'}</td>
                     <td className="p-4 text-right font-medium text-emerald-400">{med.total_sold_qty}</td>
-                    <td className="p-4 text-right">${Number(med.total_revenue).toFixed(2)}</td>
+                    <td className="p-4 text-right">{formatCurrency(med.total_revenue)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -306,7 +307,7 @@ const PharmacistReportsTab: React.FC = () => {
           {renderSummaryCard('Total Orders', reportData.summary.total_orders, <ShoppingBag size={20} className="text-blue-400" />, 'bg-blue-400/10')}
           {renderSummaryCard('Pending Orders', reportData.summary.pending_orders, <AlertTriangle size={20} className="text-amber-400" />, 'bg-amber-400/10')}
           {renderSummaryCard('Completed Orders', reportData.summary.completed_orders, <Package size={20} className="text-emerald-400" />, 'bg-emerald-400/10')}
-          {renderSummaryCard('Total Order Value', `$${Number(reportData.summary.total_order_value).toFixed(2)}`, <DollarSign size={20} className="text-indigo-400" />, 'bg-indigo-400/10')}
+          {renderSummaryCard('Total Order Value', formatCurrency(reportData.summary.total_order_value), <DollarSign size={20} className="text-indigo-400" />, 'bg-indigo-400/10')}
         </div>
         
         <div className="bg-surface rounded-xl border border-subtle p-6">
